@@ -1,0 +1,44 @@
+{
+  "name": "Timeline",
+  "plural": "timeline",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "from": {
+      "type": "time"
+    },
+    "to": {
+      "type": "time"
+    },
+    "plan": {
+      "type": "number",
+      "required": true
+    },
+    "target": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
+    "produced": {
+      "type": "number",
+      "default": 0
+    },
+    "description": {
+      "type": "string"
+    },
+    "fpy": {
+      "type": "number",
+      "default": 0
+    },
+    "model": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

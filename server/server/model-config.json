@@ -35,7 +35,28 @@
     "dataSource": "db",
     "public": false
   },
-  "Message": {
-    "dataSource": null
+  "Line": {
+    "dataSource": "mongodb",
+    "public": true
+  },
+  "Customer": {
+    "dataSource": "mongodb",
+    "public": true
+  },
+  "Shift": {
+    "dataSource": "mongodb",
+    "public": true
+  },
+  "Timeline": {
+    "dataSource": "mongodb",
+    "public": true
+  },
+  "Family": {
+    "dataSource": "mongodb",
+    "public": true
+  },
+  "TimeClean": {
+    "dataSource": "mongodb",
+    "public": true
   }
 }

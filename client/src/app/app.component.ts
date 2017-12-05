@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import moment = require('moment');
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -9,5 +8,4 @@ import moment = require('moment');
 
 export class AppComponent {
   title = 'app';
-date = moment().format('LTS');
 }

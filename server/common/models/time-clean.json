@@ -1,0 +1,19 @@
+{
+  "name": "TimeClean",
+  "plural": "timeClean",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "time": {
+      "type": "time",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

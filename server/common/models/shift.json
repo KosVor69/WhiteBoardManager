@@ -1,0 +1,35 @@
+{
+  "name": "Shift",
+  "plural": "shift",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "nextShift": {
+      "type": "number"
+    },
+    "isEnable": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "timelines": {
+      "type": "hasMany",
+      "model": "Timeline",
+      "foreignKey": "",
+      "options": {
+        "nestRemoting": true
+      }
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

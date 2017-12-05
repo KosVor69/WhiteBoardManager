@@ -1,0 +1,54 @@
+{
+  "name": "Line",
+  "plural": "line",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "isEnableClean": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "isCommonFPY": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "messageClean": {
+      "type": "string"
+    },
+    "timeClean": {
+      "type": "string"
+    },
+    "targetFPY": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "shifts": {
+      "type": "hasMany",
+      "model": "shift",
+      "foreignKey": ""
+    },
+    "models": {
+      "type": "hasMany",
+      "model": "Model",
+      "foreignKey": ""
+    },
+    "timeCleans": {
+      "type": "hasMany",
+      "model": "TimeClean",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
