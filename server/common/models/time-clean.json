@@ -8,7 +8,7 @@
   },
   "properties": {
     "time": {
-      "type": "time",
+      "type": "string",
       "required": true
     }
   },

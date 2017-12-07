@@ -36,27 +36,27 @@
     "public": false
   },
   "Line": {
-    "dataSource": "mongodb",
+    "dataSource": "db",
     "public": true
   },
   "Customer": {
-    "dataSource": "mongodb",
+    "dataSource": "db",
     "public": true
   },
   "Shift": {
-    "dataSource": "mongodb",
+    "dataSource": "db",
     "public": true
   },
   "Timeline": {
-    "dataSource": "mongodb",
+    "dataSource": "db",
     "public": true
   },
   "Family": {
-    "dataSource": "mongodb",
+    "dataSource": "db",
     "public": true
   },
   "TimeClean": {
-    "dataSource": "mongodb",
+    "dataSource": "db",
     "public": true
   }
 }

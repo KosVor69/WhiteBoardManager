@@ -8,10 +8,10 @@
   },
   "properties": {
     "from": {
-      "type": "time"
+      "type": "string"
     },
     "to": {
-      "type": "time"
+      "type": "string"
     },
     "plan": {
       "type": "number",

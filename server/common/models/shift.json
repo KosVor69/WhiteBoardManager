@@ -24,10 +24,7 @@
     "timelines": {
       "type": "hasMany",
       "model": "Timeline",
-      "foreignKey": "",
-      "options": {
-        "nestRemoting": true
-      }
+      "foreignKey": ""
     }
   },
   "acls": [],

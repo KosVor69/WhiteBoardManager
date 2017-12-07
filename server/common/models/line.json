@@ -35,12 +35,12 @@
   "relations": {
     "shifts": {
       "type": "hasMany",
-      "model": "shift",
+      "model": "Shift",
       "foreignKey": ""
     },
     "models": {
       "type": "hasMany",
-      "model": "Model",
+      "model": "Family",
       "foreignKey": ""
     },
     "timeCleans": {
