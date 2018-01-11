@@ -11,7 +11,8 @@ import { MainService } from './service/main.service';
 
 const appRoutes: Routes = [
   { path: 'board', component: BoardComponent },
-  { path: 'home', component: HomeComponent }
+  { path: 'home', component: HomeComponent },
+  { path: '', component: HomeComponent }
 ];
 
 @NgModule({
