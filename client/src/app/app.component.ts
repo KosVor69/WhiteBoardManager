@@ -1,4 +1,10 @@
-import { Component, Attribute } from '@angular/core';
+import { Component, Attribute, OnInit } from '@angular/core';
+import { Http, Response } from '@angular/http';
+import { MainService } from './service/main.service';
+// tslint:disable-next-line:import-blacklist
+import { Observable } from 'rxjs/Rx';
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -7,6 +13,5 @@ import { Component, Attribute } from '@angular/core';
 
 
 export class AppComponent {
-  title = 'app'; 
-}
 
+}

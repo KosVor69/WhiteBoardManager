@@ -12,7 +12,7 @@
       "required": true
     },
     "nextShift": {
-      "type": "number"
+      "type": "string"
     },
     "isEnable": {
       "type": "boolean",

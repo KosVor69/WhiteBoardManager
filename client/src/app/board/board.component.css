@@ -1,0 +1,129 @@
+table{
+    table-layout: fixed;
+}
+
+td{
+    word-wrap:break-word
+}
+
+.background{
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 102, 204)  
+}
+
+.main,.head{
+    background-color: rgb(51, 153, 255);
+    height: 10%;
+}
+
+.week{
+    width: 15%;   
+}
+
+.date{
+    width: 20%;
+}
+
+.title{
+    width: 65%;
+}
+
+.head{
+    height: 8%;
+}
+
+.column1{
+    width: 15%;
+}
+
+.column2-6{
+    width: 10%;
+}
+
+
+.column7{
+    width: 15%;
+}
+
+.column8{
+    width: 20%;
+}
+
+.text-box{
+    background-color: rgb(255, 255, 255);
+    height: 8.2%;
+}
+
+.text-box-rowspan{
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    height: 16.4%;
+    font-size: 4vw;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+.time{
+    width: 35%;
+}
+
+.footer{
+    height: 14%;
+}
+
+.text-head,.text-sub-head{
+    font-size: 3vw;
+    /* line-height: 1vw; */
+    /* width: 100%; */
+    /* height: 100%; */
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: white;
+    /* margin: 0; */
+}
+
+.text-sub-head{
+    font-size: 2vw;
+    padding: 3px;
+}
+
+.text-clock{
+    font-size: 7vw;
+    /* width: 100%; */
+    /* height: 100%; */
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: rgb(0, 102, 204) 
+    /* line-height: 8vw; */
+    /* margin: 0; */
+}
+
+.text-main{
+    font-size: 5vw;
+    /* width: 100%; */
+    /* height: 100%; */
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: rgb(0, 0, 0);
+    /* line-height: 6vw; */
+    /* margin: 0; */
+}
+
+.text-fpy{
+    font-size: 4vw;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: rgb(0, 0, 0);
+}
+
+.text-small{
+    font-size: 2vw;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: rgb(0, 0, 0);
+}
+
+
+
+
