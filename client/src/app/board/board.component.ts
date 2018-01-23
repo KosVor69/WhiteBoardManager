@@ -1,14 +1,17 @@
+import { Customer } from './../../sdk/models/Customer';
+import { Shift } from './../../sdk/models/Shift';
+import { Line } from './../../sdk/models/Line';
+import { Timeline } from './../../sdk/models/Timeline';
 import { Component, Attribute, OnInit } from '@angular/core';
 import { MainService } from '../service/main.service';
 // tslint:disable-next-line:import-blacklist
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { error } from 'util';
-
-
-
+import { LoopBackConfig, CustomerApi, ShiftApi, LineApi } from '../../sdk';
+import { Injectable, Inject, Optional } from '@angular/core';
 
 @Component({
   selector: 'app-board',
@@ -56,7 +59,12 @@ export class BoardComponent {
   line4description: string;
   line4fpy: number;
 
-  constructor(private route: ActivatedRoute, public mainService: MainService) {
+  constructor(private route: ActivatedRoute
+    , public mainService: MainService
+    , private lineApi: LineApi
+    , private customerApi: CustomerApi
+    , private shiftApi: ShiftApi) {
+
     this.querySubscription = this.route.queryParams.subscribe(
       (queryParam: any) => {
         this.line = queryParam['line'];
@@ -68,15 +76,14 @@ export class BoardComponent {
       this.dateTime = new Date();
     });
 
-    this.mainService.getLines().subscribe((lines: Line[]) => {
-      lines.forEach(element => {
-        if (element.name === this.line) {
-          this.mainService.getShifts(element.id).subscribe((shifts: Shift[]) => {
+
+    lineApi.findOne({where: {name: this.line}}, function(err, lines) { }).subscribe((line: Line) => {
+          lineApi.getShifts(line.id, {where: {isEnable: true}}, function(err, shifts) { } ).subscribe((shifts: Shift[]) => {
             shifts.forEach(shift => {
-              this.mainService.getTimeLines(shift.id).subscribe((timelines: TimeLine[]) => {
+              shiftApi.getTimelines(shift.id, undefined, function(err, timelines) { }).subscribe((timelines: Timeline[]) => {
                 let i = 1;
                 // tslint:disable-next-line:max-line-length
-                timelines.sort((a: TimeLine, b: TimeLine) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
+                timelines.sort((a: Timeline, b: Timeline) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
                   .forEach(timeline => {
                     if (i === 1) {
                       this.timelineFromTime.setTime(Date.parse(new Date().toDateString() + ' ' + timeline.from));
@@ -95,17 +102,15 @@ export class BoardComponent {
               });
             });
           });
-        }
-      });
     }
     );
   }
 
   fillBoard() {
     if (this.currentShiftId !== undefined) {
-      this.mainService.getTimeLines(this.currentShiftId).subscribe((timelines: TimeLine[]) => {
+      this.shiftApi.getTimelines(this.currentShiftId, undefined, function(err, timelines) { }).subscribe((timelines: Timeline[]) => {
         // tslint:disable-next-line:max-line-length
-        timelines.sort((a: TimeLine, b: TimeLine) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
+        timelines.sort((a: Timeline, b: Timeline) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
           .forEach(t => {
             switch (this.index) {
               case 1: {
@@ -256,32 +261,4 @@ export class BoardComponent {
   }
 
 }
-export interface Customer {
-  name: string;
-  id: string;
-}
 
-export interface Line {
-  name: string;
-  id: string;
-}
-
-export interface Shift {
-  name: string;
-  id: string;
-  lineId: string;
-  nextShift: string;
-}
-
-export interface TimeLine {
-  from: string;
-  to: string;
-  plan: number;
-  target: number;
-  produced: number;
-  description: string;
-  fpy: number;
-  model: string;
-  id: string;
-  shiftId: string;
-}

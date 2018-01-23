@@ -15,14 +15,14 @@
       </div>
       <div class="grid-item">
         <p>Line:</p>
-        <select id="line-select" class="soflow" (change)="onLineSelect($event.target.value)">
+        <select id="line-select" [(ngModel)]="lineSelector" class="soflow" (change)="onLineSelect($event.target.value)">
           <option value="" selected disabled hidden></option>
           <option *ngFor="let line of Lines" [value]="line.id">{{line.name}}</option>
         </select>
       </div>
       <div class="grid-item">
         <p>Line:</p>
-        <select id="shift-select" class="soflow" (change)="onShiftSelect($event.target.value)">
+        <select id="shift-select" [(ngModel)]="shiftSelector" class="soflow" (change)="onShiftSelect($event.target.value)">
           <option value="" selected disabled hidden></option>
           <option *ngFor="let shift of Shifts" [value]="shift.id">{{shift.name}}</option>
         </select>
@@ -58,106 +58,106 @@
 
       <!-- 1 timeline -->
       <div class="grid-item">
-        <input id="from1" type="text" (input)="onFrom1input($event.target.value)">
+        <input [(ngModel)]="from1" type="text" (input)="onFrom1input($event.target.value)">
       </div>
       <div class="grid-item">
-        <input id="to1" type="text">
+        <input type="text" [(ngModel)]="to1">
       </div>
       <div class="grid-item">
-        <input id="model1" type="text">
+        <input [(ngModel)]="model1" type="text">
       </div>
       <div class="grid-item">
-        <input id="plan1" type="text">
+        <input [(ngModel)]="plan1" type="text">
       </div>
       <div class="grid-item">
-        <input id="target1" type="text">
+        <input [(ngModel)]="target1" type="text">
       </div>
       <div class="grid-item">
-        <input id="produced1" type="text">
+        <input [(ngModel)]="produced1" type="text">
       </div>
       <div class="grid-item">
-        <input id="fpy1" type="text">
+        <input [(ngModel)]="fpy1" type="text">
       </div>
       <div class="grid-item">
-        <textarea id="description1" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
+        <textarea [(ngModel)]="description1" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
       </div>
 
       <!-- 2 timeline -->
       <div class="grid-item">
-        <input id="from2" type="text">
+        <input [(ngModel)]="from2" type="text">
       </div>
       <div class="grid-item">
-        <input id="to2" type="text">
+        <input [(ngModel)]="to2" type="text">
       </div>
       <div class="grid-item">
-        <input id="model2" type="text">
+        <input [(ngModel)]="model2" type="text">
       </div>
       <div class="grid-item">
-        <input id="plan2" type="text">
+        <input [(ngModel)]="plan2" type="text">
       </div>
       <div class="grid-item">
-        <input id="target2" type="text">
+        <input [(ngModel)]="target2" type="text">
       </div>
       <div class="grid-item">
-        <input id="produced2" type="text">
+        <input [(ngModel)]="produced2" type="text">
       </div>
       <div class="grid-item">
-        <input id="fpy2" type="text">
+        <input [(ngModel)]="fpy2" type="text">
       </div>
       <div class="grid-item">
-          <textarea id="description2" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
+          <textarea [(ngModel)]="description2" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
       </div>
 
       <!-- 3 timeline -->
       <div class="grid-item">
-        <input id="from3" type="text">
+        <input [(ngModel)]="from3" type="text">
       </div>
       <div class="grid-item">
-        <input id="to3" type="text">
+        <input [(ngModel)]="to3" type="text">
       </div>
       <div class="grid-item">
-        <input id="model3" type="text">
+        <input [(ngModel)]="model3" type="text">
       </div>
       <div class="grid-item">
-        <input id="plan3" type="text">
+        <input [(ngModel)]="plan3" type="text">
       </div>
       <div class="grid-item">
-        <input id="target3" type="text">
+        <input [(ngModel)]="target3" type="text">
       </div>
       <div class="grid-item">
-        <input id="produced3" type="text">
+        <input [(ngModel)]="produced3" type="text">
       </div>
       <div class="grid-item">
-        <input id="fpy3" type="text">
+        <input [(ngModel)]="fpy3" type="text">
       </div>
       <div class="grid-item">
-          <textarea id="description3" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
+          <textarea [(ngModel)]="description3" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
       </div>
 
       <!-- 4 timeline -->
       <div class="grid-item">
-        <input id="from4" type="text">
+        <input [(ngModel)]="from4" type="text">
       </div>
       <div class="grid-item">
-        <input id="to4" type="text">
+        <input [(ngModel)]="to4" type="text">
       </div>
       <div class="grid-item">
-        <input id="model4" type="text">
+        <input [(ngModel)]="model4" type="text">
       </div>
       <div class="grid-item">
-        <input id="plan4" type="text">
+        <input [(ngModel)]="plan4" type="text">
       </div>
       <div class="grid-item">
-        <input id="target4" type="text">
+        <input [(ngModel)]="target4" type="text">
       </div>
       <div class="grid-item">
-        <input id="produced4" type="text">
+        <input [(ngModel)]="produced4" type="text">
       </div>
       <div class="grid-item">
-        <input id="fpy4" type="text">
+        <input [(ngModel)]="fpy4" type="text">
       </div>
       <div class="grid-item">
-          <textarea id="description4" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
+          <textarea [(ngModel)]="description4" style="font-size:12px; height:37px; width:300px; resize: none;"></textarea>
       </div>
     </div>
   </main>
