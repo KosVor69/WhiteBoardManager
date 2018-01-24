@@ -2,7 +2,7 @@
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-
+const fallback = require('express-history-api-fallback');
 var app = module.exports = loopback();
 
 app.start = function() {
