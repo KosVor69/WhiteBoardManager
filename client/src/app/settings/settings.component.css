@@ -38,17 +38,11 @@ select.soflow{
 
  #grid-controls{
    display: grid;
-   grid-template-columns: 250px 220px 100px 250px; 
-   grid-template-rows: 50px 50px; 
+   grid-template-columns: 250px 250px 250px; 
+   grid-template-rows: 100%;
    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
  }
 
- #grid-editor{
-    display: grid;
-    grid-template-columns: 90px 90px 300px 100px 100px 100px 100px 300px ; 
-    grid-template-rows: 20px 45px 45px 45px 45px; 
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  }
 
  .grid-item {
     padding: .2em;
@@ -61,12 +55,6 @@ margin-bottom: 1px;
 color: rgb(92, 92, 92);
   }
 
-  input {
-      width: 100%;
-    font-size: 32px;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  }
-
   #btn-go[_ngcontent-c1] {
     background-color: white;
     border-style: solid;
@@ -76,16 +64,64 @@ color: rgb(92, 92, 92);
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-.example-icon {
-  padding: 0 14px;
-  cursor: pointer;
+
+#material-list-grid{
+  margin: 10px;
+  display: grid;
+  /* margin: 5px; */
+  -ms-grid-columns: 300px;
+  /* grid-template-columns: 200px; */
+  -ms-grid-rows: 50px;
+  /* grid-template-rows: 30px; */
+  /* border: solid; */
+  /* box-shadow: 0px 0px 5px 0px #bdbdbd; */
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-.example-spacer {
-  flex: 1 1 auto;
+#material-list-item{
+    /* margin-bottom: 3px; */
+    /* margin-left: 10px; */
+    margin: 3px;
+    display: -ms-grid;
+    display: grid;
+    box-shadow: 0px 0px 5px 0px #bdbdbd;
+    -ms-grid-columns: 250px 50px;
+    /* margin: 3px; */
+    padding-left: 5px;
+    grid-template-columns: 200px 30px;
+    -ms-grid-rows: 50px;
+    grid-template-rows: 30px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+#material-list-item-text{
+  color: rgb(61, 61, 61);
+  line-height: 30px;
+}
+
+#material-list-item-input{
+  border: none;
+  color: rgb(61, 61, 61);
+  line-height: 30px;
+}
+
+#material-list-item-button{
+  color: rgb(61, 61, 61);
+  border: none;
+  background-color: white;
 }
 
 .mat-toolbar {
   background: #2196F3;
-  color: rgba(255, 255, 255, 0.87);
+  color: rgb(255, 255, 255);
+}
+
+#customer-list{
+  height: 100%;
+  /* border: solid; */
+  border-right: 1px solid grey;
+}
+
+input::placeholder {
+  color: rgb(194, 194, 194);
 }

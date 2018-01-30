@@ -22,23 +22,51 @@ import { MainService } from './service/main.service';
 
 import { LineApi } from './../sdk/services/custom/Line';
 import { SDKModels } from '../sdk/index';
+import { SettingsComponent } from './settings/settings.component';
 
-
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MatButtonModule, MatCheckboxModule, MatToolbarModule, MatIconModule, MatListModule} from '@angular/material';
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'board', component: BoardComponent},
+  { path: 'settings', component: SettingsComponent},
   { path: 'home', component: HomeComponent}
 ];
 
 @NgModule({
   declarations: [
-    AppComponent, BoardComponent, HomeComponent
+    AppComponent
+    , BoardComponent
+    , HomeComponent
+    , SettingsComponent
   ],
   imports: [
-    BrowserModule, HttpClientModule,  RouterModule.forRoot(appRoutes, {useHash: true}), FormsModule, HttpModule
+    BrowserModule
+    , HttpClientModule
+    ,  RouterModule.forRoot(appRoutes, {useHash: true})
+    , FormsModule
+    , HttpModule
+    , BrowserAnimationsModule
+    , MatButtonModule
+    , MatCheckboxModule
+    , MatToolbarModule
+    , MatIconModule
+    , MatListModule
   ],
-  providers: [ MainService, SocketConnection, SocketDriver, SDKModels, LoopBackAuth, InternalStorage, JSONSearchParams, ErrorHandler
-  , LineApi, CustomerApi, ShiftApi, TimelineApi, UserApi ],
+  providers: [
+    MainService
+    , SocketConnection
+    , SocketDriver
+    , SDKModels
+    , LoopBackAuth
+    , InternalStorage
+    , JSONSearchParams
+    , ErrorHandler
+    , LineApi
+    , CustomerApi
+    , ShiftApi
+    , TimelineApi
+    , UserApi ],
   bootstrap: [AppComponent]
   , exports: [ RouterModule ]
 })

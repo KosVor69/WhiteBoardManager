@@ -10,7 +10,8 @@ import { TimelineApi } from '../../sdk/services/custom/Timeline';
 import { User, AccessToken } from './../../sdk/models';
 import { UserApi } from '../../sdk';
 import { Router } from '@angular/router';
-
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatIconModule} from '@angular/material/icon';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -89,6 +90,10 @@ export class HomeComponent {
 
   goToWhiteBoard() {
     this.router.navigate(['/board'], {queryParams: {line: this.currentLine}});
+  }
+
+  goToSettings() {
+    this.router.navigate(['/settings']);
   }
 
   onCustomerSelect(customerId): void {

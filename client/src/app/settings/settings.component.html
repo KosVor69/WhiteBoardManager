@@ -1,0 +1,50 @@
+<div class="home-layout">
+  <mat-toolbar>
+    <span>Settings</span>
+  </mat-toolbar>
+  <main class="content">
+    <div id="grid-controls">
+      
+        <mat-nav-list id='customer-list'>
+          <mat-list-item *ngFor="let customer of Customers; let i = index" (mouseenter)="enter(i)" (mouseleave)="leave(i)" [attr.data-index]="i" (click)="getLines(customer.id)" >
+            <p matLine>{{customer.name}}</p>
+            <button mat-icon-button (click)="getLines($event.target.value)" *ngIf="hoverIndex == i" [value]="customer.id">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-list-item>
+          <mat-list-item>
+            <input type="text" id="material-list-item-input" matLine placeholder="New customer">
+            <button mat-icon-button (click)="showInfo(link)">
+              <mat-icon>add</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-nav-list>
+        <mat-nav-list id='line-list'>
+            <mat-list-item *ngFor="let line of Lines; let i = index" (mouseenter)="enter(i)" (mouseleave)="leave(i)" [attr.data-index]="i">
+              <p matLine>{{line.name}}</p>
+              <button mat-icon-button (click)="showInfo(link)" *ngIf="hoverIndex == i">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-list-item>
+            <mat-list-item>
+              <input type="text" id="material-list-item-input" matLine placeholder="New line">
+              <button mat-icon-button (click)="showInfo(link)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </mat-list-item>
+          </mat-nav-list>
+    </div>
+    <!-- <div id="grid-controls">
+      <div id="material-list-grid">
+        <div id="material-list-item" *ngFor="let customer of Customers">
+          <p id="material-list-item-text">{{customer.name}}</p>
+          <button id="material-list-item-button"><i class="material-icons">delete</i></button>
+        </div>
+        <div id="material-list-item">
+            <input type="text" placeholder="Add customer" id="material-list-item-input">
+            <button id="material-list-item-button"><i class="material-icons">add</i></button>
+          </div>
+      </div> 
+    </div>-->
+  </main>
+</div>
