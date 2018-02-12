@@ -16,15 +16,18 @@
       "required": true,
       "default": false
     },
-    "isCommonFPY": {
+    "isAutofill": {
       "type": "boolean",
       "required": true,
-      "default": true
+      "default": false
+    },
+    "currentShift": {
+      "type": "string"
     },
     "messageClean": {
       "type": "string"
     },
-    "timeClean": {
+    "sound": {
       "type": "string"
     },
     "targetFPY": {

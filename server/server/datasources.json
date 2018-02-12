@@ -5,8 +5,15 @@
     "url": "",
     "database": "wbm",
     "password": "",
-    "name": "mongoDS",
+    "name": "db",
     "user": "",
     "connector": "mongodb"
+  },
+  "localfile": {
+    "name": "localfile",
+    "connector": "loopback-component-storage",
+    "provider": "filesystem",
+    "root": "./files/sounds",
+    "maxFileSize": "10485760"
   }
 }

@@ -10,8 +10,14 @@ import { TimelineApi } from '../../sdk/services/custom/Timeline';
 import { User, AccessToken } from './../../sdk/models';
 import { UserApi } from '../../sdk';
 import { Router } from '@angular/router';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatIconModule} from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { CustomerDialogComponent } from '../forms/customer-form.component';
+import { LineDialogComponent } from '../forms/line-form.component';
+import { ShiftDialogComponent } from '../forms/shift-form.component';
+import { filter } from 'rxjs/operators';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -23,8 +29,8 @@ export class HomeComponent {
   Customers: Customer[];
   Lines: Line[];
   Shifts: Shift[];
- /* private _fb: FormBuilder;
-  myForm: FormGroup;*/
+  /* private _fb: FormBuilder;
+   myForm: FormGroup;*/
   from1: string;
   to1: string;
   model1: string;
@@ -65,8 +71,14 @@ export class HomeComponent {
 
   lineSelector: string;
   shiftSelector: string;
+  customerSelector: string;
 
-  currentLine: string;
+  currentLine: Line;
+  currentCustomer: Customer;
+
+  customerSelected = false;
+  lineSelected = false;
+  shiftSelected = false;
 
   private user: User = new User();
 
@@ -77,26 +89,122 @@ export class HomeComponent {
     , private shiftApi: ShiftApi
     , private timelineApi: TimelineApi
     , private userApi: UserApi
-    , private router: Router) {
-      this.user.username = 'admin';
-      this.user.password = 'admin';
-      this.user.email = 'admin@admin.com';
-      // this.signin();
-    customerApi.find(undefined, function(err, customer) { }).subscribe((customers: Customer[]) => {
+    , private router: Router
+    , public dialog: MatDialog) {
+
+    customerApi.find(undefined, function (err, customer) { }).subscribe((customers: Customer[]) => {
       this.Customers = customers;
     });
 
   }
 
+  newCustomer(): void {
+    const dialogRef = this.dialog.open(CustomerDialogComponent, {
+      width: '300px',
+      data: { title: 'New customer', customerName: '' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result !== undefined) {
+        let customer: Customer;
+        customer = result;
+        console.log(customer.name);
+      this.customerApi.create(customer).subscribe((c: Customer) => console.log('New customer created: ' + c.name));
+      this.customerSelector = '';
+      this.currentCustomer = undefined;
+      this.updateCustomers();
+      }
+    });
+  }
+
+  editCustomer(customer): void {
+    const dialogRef = this.dialog.open(CustomerDialogComponent, {
+      width: '300px',
+      data: { title: 'Edit customer', delete: false, name: customer.name, id: customer.id }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      let customerEdited: Customer;
+      customerEdited = result;
+      if (result !== undefined) {
+        if (result.delete === true) {
+              this.customerApi.deleteById(result.id).subscribe((deletedCustomer: Customer) => {
+                console.log('Customer deleted: ' + deletedCustomer.name);
+              });
+        } else {
+              this.customerApi.updateAttributes(result.id, customerEdited).subscribe((editedCustomer: Customer) => {
+                console.log('Customer updated: ' + editedCustomer.name);
+                this.currentCustomer = customerEdited;
+            });
+        }
+      }
+      this.updateCustomers();
+    });
+  }
+
+  newLine(): void {
+    const dialogRef = this.dialog.open(LineDialogComponent, {
+      data: { title: 'New line', lineName: '' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result !== undefined) {
+        let line: Line;
+        line = result;
+        console.log(line.name);
+      this.lineApi.create(line).subscribe((l: Line) => console.log('New line created: ' + l.name));
+      this.lineSelector = '';
+      this.currentLine = undefined;
+      this.updateLines(result.customerId);
+      }
+    });
+  }
+
+  editLine(): void {
+    const dialogRef = this.dialog.open(LineDialogComponent, {
+      width: '300px',
+      data: { name: 'Edit customer' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
+  }
+
+  newShift(): void {
+    const dialogRef = this.dialog.open(ShiftDialogComponent, {
+      width: '300px',
+      data: { name: 'New customer' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
+  }
+
+  editShift(): void {
+    const dialogRef = this.dialog.open(ShiftDialogComponent, {
+      width: '300px',
+      data: { name: 'Edit customer' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
+  }
+
   goToWhiteBoard() {
-    this.router.navigate(['/board'], {queryParams: {line: this.currentLine}});
+    this.router.navigate(['/board'], { queryParams: { line: this.currentLine.name } });
   }
 
   goToSettings() {
     this.router.navigate(['/settings']);
   }
 
-  onCustomerSelect(customerId): void {
+  onCustomerSelect(customer): void {
+    this.customerSelected = true;
+    this.currentCustomer = customer;
+    console.log(customer.name);
     this.clearEditor();
     if (this.Shifts !== undefined) {
       while (this.Shifts.length > 0) {
@@ -110,14 +218,27 @@ export class HomeComponent {
     }
 
     this.lineSelector = '';
-    this.customerApi.getLines(customerId, undefined, function(err, line) { }).subscribe((lines: Line[]) => {
+    this.customerApi.getLines(customer.id, undefined, function (err, line) { }).subscribe((lines: Line[]) => {
       this.Lines = lines;
     });
   }
 
+updateCustomers(): void {
+  this.customerApi.find(undefined, function (err, cust) { }).subscribe((customers: Customer[]) => {
+    this.Customers = customers;
+  });
+}
+
+updateLines(customerId): void {
+  this.customerApi.getLines(customerId, undefined, function (err, line) { }).subscribe((lines: Line[]) => {
+    this.Lines = lines;
+  });
+}
+
   onLineSelect(lineId): void {
+    this.lineSelected = true;
     this.clearEditor();
-    this.currentLine = this.Lines.filter(x => x.id === lineId)[0].name;
+    this.currentLine = this.Lines.filter(x => x.id === lineId)[0];
     if (this.Shifts !== undefined) {
       while (this.Shifts.length > 0) {
         this.Shifts.pop();
@@ -125,14 +246,15 @@ export class HomeComponent {
     }
 
     this.shiftSelector = '';
-    this.lineApi.getShifts(lineId, undefined, function(err, shift) { }).subscribe((shifts: Shift[]) => {
+    this.lineApi.getShifts(lineId, undefined, function (err, shift) { }).subscribe((shifts: Shift[]) => {
       this.Shifts = shifts;
     });
   }
 
   onShiftSelect(shiftId): void {
+    this.shiftSelected = true;
     this.clearEditor();
-    this.shiftApi.getTimelines(shiftId, undefined, function(err, timeline) { }).subscribe((timelines: Timeline[]) => {
+    this.shiftApi.getTimelines(shiftId, undefined, function (err, timeline) { }).subscribe((timelines: Timeline[]) => {
       let i = 1;
       // tslint:disable-next-line:max-line-length
       timelines.sort((a: Timeline, b: Timeline) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
@@ -196,228 +318,228 @@ export class HomeComponent {
   }
 
   onFrom1input(value): void {
-   this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-         t.from  = value;
-          this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.from = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
     });
   }
 
   onTo1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.to = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.to = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onModel1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.model = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+  onModel1input(value): void {
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.model = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onPlan1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.plan = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+  onPlan1input(value): void {
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.plan = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onTarget1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.target = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+  onTarget1input(value): void {
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.target = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onProduced1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.produced = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+  onProduced1input(value): void {
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.produced = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onFPY1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.fpy = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+  onFPY1input(value): void {
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.fpy = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onDescription1input(value): void {
-    this.timelineApi.findById(this.timeline1Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.description = value;
-           this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
+  onDescription1input(value): void {
+    this.timelineApi.findById(this.timeline1Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.description = value;
+      this.timelineApi.updateAttributes(this.timeline1Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-   onFrom2input(value): void {
-    this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-          t.from  = value;
-           this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-     });
-   }
- 
-   onTo2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.to = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
- 
-    onModel2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.model = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
- 
-    onPlan2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.plan = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
- 
-    onTarget2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.target = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
- 
-    onProduced2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.produced = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
- 
-    onFPY2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.fpy = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
- 
-    onDescription2input(value): void {
-     this.timelineApi.findById(this.timeline2Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-           t.description = value;
-            this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
-      });
-    }
+  onFrom2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.from = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-    onFrom3input(value): void {
-      this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-            t.from  = value;
-             this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-       });
-     }
-   
-     onTo3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.to = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
-   
-      onModel3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.model = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
-   
-      onPlan3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.plan = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
-   
-      onTarget3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.target = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
-   
-      onProduced3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.produced = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
-   
-      onFPY3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.fpy = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
-   
-      onDescription3input(value): void {
-       this.timelineApi.findById(this.timeline3Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-             t.description = value;
-              this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
-        });
-      }
+  onTo2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.to = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
-      onFrom4input(value): void {
-        this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-              t.from  = value;
-               this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-         });
-       }
-     
-       onTo4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.to = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
-     
-        onModel4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.model = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
-     
-        onPlan4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.plan = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
-     
-        onTarget4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.target = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
-     
-        onProduced4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.produced = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
-     
-        onFPY4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.fpy = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
-     
-        onDescription4input(value): void {
-         this.timelineApi.findById(this.timeline4Id, undefined, function(err, result) { }).subscribe((t: Timeline) => {
-               t.description = value;
-                this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
-          });
-        }
+  onModel2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.model = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onPlan2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.plan = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onTarget2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.target = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onProduced2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.produced = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onFPY2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.fpy = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onDescription2input(value): void {
+    this.timelineApi.findById(this.timeline2Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.description = value;
+      this.timelineApi.updateAttributes(this.timeline2Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onFrom3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.from = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onTo3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.to = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onModel3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.model = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onPlan3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.plan = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onTarget3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.target = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onProduced3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.produced = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onFPY3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.fpy = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onDescription3input(value): void {
+    this.timelineApi.findById(this.timeline3Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.description = value;
+      this.timelineApi.updateAttributes(this.timeline3Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onFrom4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.from = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onTo4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.to = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onModel4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.model = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onPlan4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.plan = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onTarget4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.target = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onProduced4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.produced = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onFPY4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.fpy = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
+
+  onDescription4input(value): void {
+    this.timelineApi.findById(this.timeline4Id, undefined, function (err, result) { }).subscribe((t: Timeline) => {
+      t.description = value;
+      this.timelineApi.updateAttributes(this.timeline4Id, t).subscribe((timeline: Timeline) => { });
+    });
+  }
 
   clearEditor() {
     this.from1 = '';

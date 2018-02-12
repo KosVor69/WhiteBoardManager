@@ -1,0 +1,43 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<div mat-dialog-content>
+
+
+    <div id="grid-main">
+        <div id="grid-main-column1">
+            <mat-form-field>
+                <input matInput placeholder="Name" [(ngModel)]="data.name">
+            </mat-form-field>
+
+            <mat-form-field>
+                <input matInput placeholder="Sound" [(ngModel)]="data.sound">
+            </mat-form-field>
+            <mat-form-field>
+                <input matInput placeholder="Message for clean" [(ngModel)]="data.messageClean">
+            </mat-form-field>
+
+            <div id='grid-main-sub-row'>
+                <mat-slide-toggle [(ngModel)]="data.isAutofill">Autofill</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="data.isEnableClean">Clean</mat-slide-toggle>
+                <mat-form-field>
+                    <input matInput placeholder="Target FPY" [(ngModel)]="data.targetFPY">
+                </mat-form-field>
+            </div>
+            <mat-form-field>
+                TimeClean:
+                <mat-chip-list #chipList>
+                    <mat-chip *ngFor="let time of times" [selectable]="selectable" [removable]="removable" (remove)="remove(time)">{{time.time}}
+                        <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                    </mat-chip>
+                </mat-chip-list>
+                <input [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="addOnBlur"
+                    (matChipInputTokenEnd)="add($event)" />
+            </mat-form-field>
+
+        </div>
+    </div>
+
+</div>
+<div mat-dialog-actions>
+    <button mat-button *ngIf="data.title != 'New line'" (click)="delete()">Delete</button>
+    <button mat-button cdkFocusInitial (click)="save()">Save</button>
+</div>

@@ -12,9 +12,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-
 import { AppComponent } from './app.component';
 import { BoardComponent } from './board/board.component';
 import { HomeComponent } from './home/home.component' ;
@@ -23,9 +22,26 @@ import { MainService } from './service/main.service';
 import { LineApi } from './../sdk/services/custom/Line';
 import { SDKModels } from '../sdk/index';
 import { SettingsComponent } from './settings/settings.component';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatButtonModule, MatCheckboxModule, MatToolbarModule, MatIconModule, MatListModule} from '@angular/material';
+import {MatButtonModule
+  , MatCheckboxModule
+  , MatToolbarModule
+  , MatIconModule
+  , MatListModule
+  , MatFormFieldModule
+  , MatInputModule
+  , MatSelectModule
+  , MatSlideToggleModule,
+  MatCardModule,
+  MatChipsModule} from '@angular/material';
+import { validateConfig } from '@angular/router/src/config';
+import { CustomerDialogComponent} from './forms/customer-form.component';
+import { LineDialogComponent} from './forms/line-form.component';
+import { ShiftDialogComponent} from './forms/shift-form.component';
+import { CdkTableModule } from '@angular/cdk/table';
+
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'board', component: BoardComponent},
@@ -39,12 +55,16 @@ const appRoutes: Routes = [
     , BoardComponent
     , HomeComponent
     , SettingsComponent
+    , CustomerDialogComponent
+    , LineDialogComponent
+    , ShiftDialogComponent
   ],
   imports: [
     BrowserModule
     , HttpClientModule
     ,  RouterModule.forRoot(appRoutes, {useHash: true})
     , FormsModule
+    , ReactiveFormsModule
     , HttpModule
     , BrowserAnimationsModule
     , MatButtonModule
@@ -52,6 +72,14 @@ const appRoutes: Routes = [
     , MatToolbarModule
     , MatIconModule
     , MatListModule
+    , MatFormFieldModule
+    , MatInputModule
+    , MatSelectModule
+    , MatSlideToggleModule
+    , MatCardModule
+    , CdkTableModule
+    , MatDialogModule
+    , MatChipsModule
   ],
   providers: [
     MainService
@@ -67,6 +95,11 @@ const appRoutes: Routes = [
     , ShiftApi
     , TimelineApi
     , UserApi ],
+    entryComponents: [
+      CustomerDialogComponent
+      , LineDialogComponent
+      , ShiftDialogComponent
+  ],
   bootstrap: [AppComponent]
   , exports: [ RouterModule ]
 })

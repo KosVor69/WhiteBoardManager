@@ -4,36 +4,58 @@
   </mat-toolbar>
   <main class="content">
     <div id="grid-controls">
-      
-        <mat-nav-list id='customer-list'>
-          <mat-list-item *ngFor="let customer of Customers; let i = index" (mouseenter)="enter(i)" (mouseleave)="leave(i)" [attr.data-index]="i" (click)="getLines(customer.id)" >
-            <p matLine>{{customer.name}}</p>
-            <button mat-icon-button (click)="getLines($event.target.value)" *ngIf="hoverIndex == i" [value]="customer.id">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </mat-list-item>
-          <mat-list-item>
-            <input type="text" id="material-list-item-input" matLine placeholder="New customer">
-            <button mat-icon-button (click)="showInfo(link)">
-              <mat-icon>add</mat-icon>
-            </button>
-          </mat-list-item>
-        </mat-nav-list>
-        <mat-nav-list id='line-list'>
-            <mat-list-item *ngFor="let line of Lines; let i = index" (mouseenter)="enter(i)" (mouseleave)="leave(i)" [attr.data-index]="i">
-              <p matLine>{{line.name}}</p>
-              <button mat-icon-button (click)="showInfo(link)" *ngIf="hoverIndex == i">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </mat-list-item>
-            <mat-list-item>
-              <input type="text" id="material-list-item-input" matLine placeholder="New line">
-              <button mat-icon-button (click)="showInfo(link)">
-                <mat-icon>add</mat-icon>
-              </button>
-            </mat-list-item>
-          </mat-nav-list>
+
+      <div id="grid-head">
+        <div class="example-container">
+          <mat-form-field>
+            <mat-select placeholder="Customer" (change)="getLines($event.target.value)">
+              <mat-option value="option" *ngFor="let customer of Customers" [value]="customer.id">{{customer.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <mat-icon ng-click="isReplyFormOpen = !isReplyFormOpen">add</mat-icon>
+        <mat-icon>edit</mat-icon>
+
+        <div class="example-container">
+          <mat-form-field>
+            <mat-select placeholder="Line">
+              <mat-option value="option" *ngFor="let line of Lines" [value]="line.id">{{line.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-icon>add</mat-icon>
+        <mat-icon>edit</mat-icon>
+
+      </div>
+
+      <div id="grid-main">
+          <div id="grid-main-column1">
+        <mat-slide-toggle>Autofill</mat-slide-toggle>
+        <mat-slide-toggle>Clean</mat-slide-toggle>
+
+        <mat-form-field>
+          <input matInput placeholder="Target FPY">
+        </mat-form-field>
+      </div>
+
+      <div id="grid-main-column2">
+        <mat-form-field>
+          <textarea matInput placeholder="Message for clean"></textarea>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-select placeholder="Shifts">
+            <mat-option value="option">Shift A</mat-option>
+            <mat-option value="option">Shift B</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
+    </div>
+
+
+
     <!-- <div id="grid-controls">
       <div id="material-list-grid">
         <div id="material-list-item" *ngFor="let customer of Customers">
@@ -47,4 +69,6 @@
       </div> 
     </div>-->
   </main>
+      
+ 
 </div>

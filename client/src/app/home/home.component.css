@@ -38,8 +38,8 @@ select.soflow{
 
  #grid-controls{
    display: grid;
-   grid-template-columns: 250px 220px 100px 250px; 
-   grid-template-rows: 50px 50px; 
+   grid-template-columns: 300px 300px 300px; 
+   grid-template-rows: 50px 30px; 
    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
  }
 
@@ -87,5 +87,16 @@ color: rgb(92, 92, 92);
 
 .mat-toolbar {
   background: #2196F3;
-  color: rgba(255, 255, 255, 0.87);
+  color: rgb(255, 255, 255);
+}
+
+mat-icon{
+  cursor: pointer;
+  top: 5px;
+  position: relative;
+  color: gray;
+}
+
+.content{
+  margin: 10px;
 }

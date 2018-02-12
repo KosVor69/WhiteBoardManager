@@ -7,29 +7,52 @@
   <main class="content">
     <div id="grid-controls">
       <div class="grid-item">
-        <p>Customer:</p>
+          <mat-form-field>
+              <mat-select placeholder="Customer" [(ngModel)]="customerSelector">
+                <mat-option value="option" *ngFor="let customer of Customers" (click)="onCustomerSelect(customer)">{{customer.name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-icon (click)="newCustomer()">add</mat-icon>
+            <mat-icon *ngIf="customerSelected" (click)="editCustomer(currentCustomer)">edit</mat-icon>
+        <!--<p>Customer:</p>
         <select id="customer-select" class="soflow" (change)="onCustomerSelect($event.target.value)">
           <option value="" selected disabled hidden></option>
           <option *ngFor="let customer of Customers" [value]="customer.id">{{customer.name}}</option>
-        </select>
+        </select>-->
       </div>
       <div class="grid-item">
-        <p>Line:</p>
+          <mat-form-field>
+              <mat-select placeholder="Line" [(ngModel)]="lineSelector">
+                <mat-option value="option" *ngFor="let line of Lines" (click)="onLineSelect(line.id)">{{line.name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-icon (click)="newLine()">add</mat-icon>
+            <mat-icon *ngIf="lineSelected" (click)="editLine()">edit</mat-icon>
+            <mat-icon *ngIf="lineSelected" (click)="goToWhiteBoard()">forward</mat-icon>
+        <!--<p>Line:</p>
         <select id="line-select" [(ngModel)]="lineSelector" class="soflow" (change)="onLineSelect($event.target.value)">
           <option value="" selected disabled hidden></option>
           <option *ngFor="let line of Lines" [value]="line.id">{{line.name}}</option>
-        </select>
+        </select>-->
       </div>
-      <div class="grid-item">
+      <!--<div class="grid-item">
         <div style="height:20px"></div>
         <button id="btn-go" type="button" (click)="goToWhiteBoard()">Go</button>
-      </div>
+      </div>-->
       <div class="grid-item">
-        <p>Shift:</p>
+          <mat-form-field>
+              <mat-select placeholder="Shift" [(ngModel)]="shiftSelector">
+                <mat-option value="option" *ngFor="let shift of Shifts" (click)="onShiftSelect(shift.id)">{{shift.name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-icon (click)="newShift()">add</mat-icon>
+            <mat-icon *ngIf="shiftSelected" (click)="editShift()">edit</mat-icon>
+       
+        <!--<p>Shift:</p>
         <select id="shift-select" [(ngModel)]="shiftSelector" class="soflow" (change)="onShiftSelect($event.target.value)">
           <option value="" selected disabled hidden></option>
           <option *ngFor="let shift of Shifts" [value]="shift.id">{{shift.name}}</option>
-        </select>
+        </select>-->
       </div>     
     </div>
     <div id="grid-editor">
@@ -166,4 +189,5 @@
       </div>
     </div>
   </main>
+
 </div>
