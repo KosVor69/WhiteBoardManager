@@ -50,6 +50,28 @@ export class MainService {
     });
   }
 
+  public createContainer(line: string) {
+    const headers = new HttpHeaders();
+    const data = new FormData();
+
+    return this.httpClient.post('http://10.152.5.93:3030/api/containers'
+    , line, { headers: headers}).subscribe((result: string) => {
+      console.log(line);
+    });
+  }
+
+  public uploadFile(file: File, line: string) {
+    const headers = new HttpHeaders();
+    headers.append('Content-Type', 'multipart/form-data');
+
+    const data = new FormData();
+    data.append('file', file);
+    return this.httpClient.post('http://10.152.5.93:3030/api/containers/' + line + '/upload'
+    , data, { headers: headers}).subscribe((result: File) => {
+      console.log(result.name);
+    });
+  }
+
   /*public setTimeLine(timelineID: string) {
 
     const myheader = new HttpHeaders().set('Content-Type', 'application/json');

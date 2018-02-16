@@ -9,9 +9,6 @@
             </mat-form-field>
 
             <mat-form-field>
-                <input matInput placeholder="Sound" [(ngModel)]="data.sound">
-            </mat-form-field>
-            <mat-form-field>
                 <input matInput placeholder="Message for clean" [(ngModel)]="data.messageClean">
             </mat-form-field>
 
@@ -22,6 +19,11 @@
                     <input matInput placeholder="Target FPY" [(ngModel)]="data.targetFPY">
                 </mat-form-field>
             </div>
+
+<div style="line-height:60px">
+            <input type="file" id="file" (change)="handleFileInput($event.target.files)" accept="audio/wav">
+        </div>
+
             <mat-form-field>
                 TimeClean:
                 <mat-chip-list #chipList>
@@ -30,7 +32,7 @@
                     </mat-chip>
                 </mat-chip-list>
                 <input [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="addOnBlur"
-                    (matChipInputTokenEnd)="add($event)" />
+                    (matChipInputTokenEnd)="add($event)" maxlength="5" />
             </mat-form-field>
 
         </div>

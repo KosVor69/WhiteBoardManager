@@ -1,3 +1,6 @@
+import { Container } from './../../sdk/models/Container';
+import { ContainerApi } from './../../sdk/services/custom/Container';
+import { Subject } from 'rxjs/Subject';
 import { Component, OnInit } from '@angular/core';
 import { MainService } from '../service/main.service';
 import { Customer } from './../../sdk/models/Customer';
@@ -5,7 +8,7 @@ import { Shift } from './../../sdk/models/Shift';
 import { Line } from './../../sdk/models/Line';
 import { Timeline } from './../../sdk/models/Timeline';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoopBackConfig, CustomerApi, ShiftApi, LineApi } from '../../sdk';
+import { LoopBackConfig, CustomerApi, ShiftApi, LineApi, StorageBrowser } from '../../sdk';
 import { TimelineApi } from '../../sdk/services/custom/Timeline';
 import { User, AccessToken } from './../../sdk/models';
 import { UserApi } from '../../sdk';
@@ -17,6 +20,7 @@ import { CustomerDialogComponent } from '../forms/customer-form.component';
 import { LineDialogComponent } from '../forms/line-form.component';
 import { ShiftDialogComponent } from '../forms/shift-form.component';
 import { filter } from 'rxjs/operators';
+import { Headers } from '@angular/http';
 
 @Component({
   selector: 'app-home',
@@ -90,7 +94,11 @@ export class HomeComponent {
     , private timelineApi: TimelineApi
     , private userApi: UserApi
     , private router: Router
-    , public dialog: MatDialog) {
+    , public dialog: MatDialog
+    , private containerApi: ContainerApi) {
+
+    LoopBackConfig.setBaseURL('//10.152.5.93:3030');
+    LoopBackConfig.setApiVersion('api');
 
     customerApi.find(undefined, function (err, customer) { }).subscribe((customers: Customer[]) => {
       this.Customers = customers;
@@ -106,13 +114,13 @@ export class HomeComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
-        let customer: Customer;
-        customer = result;
+        let customer = new Customer();
+        customer.name = result.name;
         console.log(customer.name);
-      this.customerApi.create(customer).subscribe((c: Customer) => console.log('New customer created: ' + c.name));
-      this.customerSelector = '';
-      this.currentCustomer = undefined;
-      this.updateCustomers();
+        this.customerApi.create(customer).subscribe((c: Customer) => console.log('New customer created: ' + c.name));
+        this.customerSelector = '';
+        this.currentCustomer = undefined;
+        this.updateCustomers();
       }
     });
   }
@@ -124,18 +132,19 @@ export class HomeComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      let customerEdited: Customer;
-      customerEdited = result;
+      // tslint:disable-next-line:prefer-const
+      let customerEdited = new Customer();
+      customerEdited.name = result.name;
       if (result !== undefined) {
         if (result.delete === true) {
-              this.customerApi.deleteById(result.id).subscribe((deletedCustomer: Customer) => {
-                console.log('Customer deleted: ' + deletedCustomer.name);
-              });
+          this.customerApi.deleteById(result.id).subscribe((deletedCustomer: Customer) => {
+            console.log('Customer deleted: ' + deletedCustomer.name);
+          });
         } else {
-              this.customerApi.updateAttributes(result.id, customerEdited).subscribe((editedCustomer: Customer) => {
-                console.log('Customer updated: ' + editedCustomer.name);
-                this.currentCustomer = customerEdited;
-            });
+          this.customerApi.updateAttributes(result.id, customerEdited).subscribe((editedCustomer: Customer) => {
+            console.log('Customer updated: ' + editedCustomer.name);
+            this.currentCustomer = customerEdited;
+          });
         }
       }
       this.updateCustomers();
@@ -144,30 +153,71 @@ export class HomeComponent {
 
   newLine(): void {
     const dialogRef = this.dialog.open(LineDialogComponent, {
-      data: { title: 'New line', lineName: '' }
+      data: { title: 'New line' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
-        let line: Line;
-        line = result;
+        let line = new Line();
+        line.name = result.name;
+        line.messageClean = result.messageClean;
+        line.targetFPY = result.targetFPY;
+        line.isEnableClean = result.isEnableClean;
+
+        line.customerId = this.currentCustomer.id;
         console.log(line.name);
-      this.lineApi.create(line).subscribe((l: Line) => console.log('New line created: ' + l.name));
-      this.lineSelector = '';
-      this.currentLine = undefined;
-      this.updateLines(result.customerId);
+        this.lineApi.create(line).subscribe((l: Line) => {
+          let c = new Container();
+          c.name = l.id;
+
+          let fd = new FormData();
+          fd.append('file', result.sound, result.sound.name);
+
+         this.containerApi.createContainer(c).subscribe((r) => {
+            this.containerApi.upload(l.id, fd, undefined, function (): Headers {
+              let headerInfo = new Headers({ 'Accept': 'multipart/form-data' });
+              return headerInfo;
+             })
+            .subscribe((s: string) => console.log(s));
+          });
+
+          console.log('New line created: ' + l.name);
+          this.lineSelector = '';
+          this.currentLine = undefined;
+          this.updateLines(l.customerId);
+        });
       }
     });
   }
 
-  editLine(): void {
+  editLine(line): void {
     const dialogRef = this.dialog.open(LineDialogComponent, {
-      width: '300px',
-      data: { name: 'Edit customer' }
+      data: { title: 'Edit customer', delete: false, name: line.name, id: line.id, customerId: line.customerId }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+      // tslint:disable-next-line:prefer-const
+      let lineEdited = new Line();
+      lineEdited.name = result.name;
+      lineEdited.customerId = result.customerId;
+      lineEdited.isAutofill = result.isAutofill;
+      lineEdited.isEnableClean = result.isEnableClean;
+      lineEdited.messageClean = result.messageClean;
+      lineEdited.targetFPY = result.targetFPY;
+      lineEdited.times = result.times;
+      if (result !== undefined) {
+        if (result.delete === true) {
+          this.lineApi.deleteById(result.id).subscribe((deletedLine: Line) => {
+            console.log('Line deleted: ' + lineEdited.name);
+          });
+        } else {
+          this.lineApi.updateAttributes(result.id, lineEdited).subscribe((editedLine: Line) => {
+            console.log('Line updated: ' + editedLine.name);
+            this.currentLine = lineEdited;
+          });
+        }
+      }
+      this.updateLines(lineEdited.customerId);
     });
   }
 
@@ -223,22 +273,22 @@ export class HomeComponent {
     });
   }
 
-updateCustomers(): void {
-  this.customerApi.find(undefined, function (err, cust) { }).subscribe((customers: Customer[]) => {
-    this.Customers = customers;
-  });
-}
+  updateCustomers(): void {
+    this.customerApi.find(undefined, function (err, cust) { }).subscribe((customers: Customer[]) => {
+      this.Customers = customers;
+    });
+  }
 
-updateLines(customerId): void {
-  this.customerApi.getLines(customerId, undefined, function (err, line) { }).subscribe((lines: Line[]) => {
-    this.Lines = lines;
-  });
-}
+  updateLines(customerId): void {
+    this.customerApi.getLines(customerId, undefined, function (err, line) { }).subscribe((lines: Line[]) => {
+      this.Lines = lines;
+    });
+  }
 
-  onLineSelect(lineId): void {
+  onLineSelect(line): void {
     this.lineSelected = true;
     this.clearEditor();
-    this.currentLine = this.Lines.filter(x => x.id === lineId)[0];
+    this.currentLine = line;
     if (this.Shifts !== undefined) {
       while (this.Shifts.length > 0) {
         this.Shifts.pop();
@@ -246,7 +296,7 @@ updateLines(customerId): void {
     }
 
     this.shiftSelector = '';
-    this.lineApi.getShifts(lineId, undefined, function (err, shift) { }).subscribe((shifts: Shift[]) => {
+    this.lineApi.getShifts(line.id, undefined, function (err, shift) { }).subscribe((shifts: Shift[]) => {
       this.Shifts = shifts;
     });
   }

@@ -1,3 +1,4 @@
+import { ContainerApi } from './../sdk/services/custom/Container';
 import { UserApi } from './../sdk/services/custom/User';
 import { ErrorHandler } from './../sdk/services/core/error.service';
 import { TimelineApi } from './../sdk/services/custom/Timeline';
@@ -20,7 +21,7 @@ import { HomeComponent } from './home/home.component' ;
 import { MainService } from './service/main.service';
 
 import { LineApi } from './../sdk/services/custom/Line';
-import { SDKModels } from '../sdk/index';
+import { SDKModels, StorageBrowser } from '../sdk/index';
 import { SettingsComponent } from './settings/settings.component';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 
@@ -41,6 +42,7 @@ import { CustomerDialogComponent} from './forms/customer-form.component';
 import { LineDialogComponent} from './forms/line-form.component';
 import { ShiftDialogComponent} from './forms/shift-form.component';
 import { CdkTableModule } from '@angular/cdk/table';
+import { Container } from '@angular/compiler/src/i18n/i18n_ast';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -88,13 +90,15 @@ const appRoutes: Routes = [
     , SDKModels
     , LoopBackAuth
     , InternalStorage
+    , StorageBrowser
     , JSONSearchParams
     , ErrorHandler
     , LineApi
     , CustomerApi
     , ShiftApi
     , TimelineApi
-    , UserApi ],
+    , UserApi
+    , ContainerApi ],
     entryComponents: [
       CustomerDialogComponent
       , LineDialogComponent

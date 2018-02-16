@@ -23,11 +23,11 @@
       <div class="grid-item">
           <mat-form-field>
               <mat-select placeholder="Line" [(ngModel)]="lineSelector">
-                <mat-option value="option" *ngFor="let line of Lines" (click)="onLineSelect(line.id)">{{line.name}}</mat-option>
+                <mat-option value="option" *ngFor="let line of Lines" (click)="onLineSelect(line)">{{line.name}}</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-icon (click)="newLine()">add</mat-icon>
-            <mat-icon *ngIf="lineSelected" (click)="editLine()">edit</mat-icon>
+            <mat-icon *ngIf="customerSelected" (click)="newLine()">add</mat-icon>
+            <mat-icon *ngIf="lineSelected" (click)="editLine(currentLine)">edit</mat-icon>
             <mat-icon *ngIf="lineSelected" (click)="goToWhiteBoard()">forward</mat-icon>
         <!--<p>Line:</p>
         <select id="line-select" [(ngModel)]="lineSelector" class="soflow" (change)="onLineSelect($event.target.value)">

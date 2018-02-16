@@ -32,6 +32,13 @@
     },
     "targetFPY": {
       "type": "number"
+    },
+    "times": {
+      "type": [
+       {
+          "time": "string"
+       }
+    ]
     }
   },
   "validations": [],

@@ -3,6 +3,7 @@ form {
     grid-template-columns: 300px;
     grid-template-rows: 50px 50px;
 }
+
 mat-card{
     box-shadow: 0px 0px 10px 1px #c7c7c7;
     position: relative;
@@ -42,14 +43,20 @@ mat-card{
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     margin: 10px;
 }
+
+#grid-browse{
+    display: grid;
+    grid-template-columns: 400px 100px; 
+    grid-template-rows: 60px;
+}
   
 #grid-main-column1{
     display: grid;
     grid-template-columns: 500px; 
-    grid-template-rows: 60px 60px 60px 50px 200px;
+    grid-template-rows: 60px 60px 50px 60px 200px;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    margin: 10px;
 }
+
 #grid-main-sub-row{
     display: grid;
     grid-template-columns: 150px 150px 200px; 
@@ -63,10 +70,10 @@ input::placeholder {
     font-size: inherit;
   }
 
-  input{
-    font-size: 24px;
-  }
-
   mat-slide-toggle{
       margin-top: 25px;
+  }
+
+  mat-form-field{
+      color:rgb(68, 68, 68);
   }

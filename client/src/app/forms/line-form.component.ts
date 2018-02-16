@@ -20,7 +20,7 @@ import { TimeClean } from '../../sdk/index';
     addOnBlur = true;
     // Enter, comma
     separatorKeysCodes = [ENTER, COMMA];
-
+    fileToUpload: File = null;
 
     constructor(
       public dialogRef: MatDialogRef<LineDialogComponent>,
@@ -31,11 +31,16 @@ import { TimeClean } from '../../sdk/index';
         this.dialogRef.close(this.data);
     }
 
-    save(customer): void {
+    save(line): void {
+
+      this.data.sound = this.fileToUpload;
+      this.data.times = this.times;
         this.dialogRef.close(this.data);
     }
 
-
+    handleFileInput(files: FileList) {
+      this.fileToUpload = files.item(0);
+  }
 
     add(event: MatChipInputEvent): void {
         const input = event.input;
@@ -43,7 +48,7 @@ import { TimeClean } from '../../sdk/index';
 
         // Add our fruit
         if ((value || '').trim()) {
-            let time = new TimeClean({time: value.trim() });
+            const time = new TimeClean({time: value.trim() });
           this.times.push(time);
         }
 
@@ -60,6 +65,7 @@ import { TimeClean } from '../../sdk/index';
         }
       }
 
+    // tslint:disable-next-line:member-ordering
     name = new FormControl('', [Validators.required, Validators.pattern('[a-zA-Z]+')]);
     getErrorMessage() {
         return this.name.hasError('required') ? 'You must enter a value' :

@@ -9,10 +9,12 @@ declare var Object: any;
 export interface LineInterface {
   "name": string;
   "isEnableClean": boolean;
-  "isCommonFPY": boolean;
+  "isAutofill": boolean;
+  "currentShift"?: string;
   "messageClean"?: string;
-  "timeClean"?: string;
+  "sound"?: string;
   "targetFPY"?: number;
+  "times"?: Array<any>;
   "id"?: any;
   "customerId"?: any;
   shifts?: Shift[];
@@ -23,10 +25,12 @@ export interface LineInterface {
 export class Line implements LineInterface {
   "name": string;
   "isEnableClean": boolean;
-  "isCommonFPY": boolean;
+  "isAutofill": boolean;
+  "currentShift": string;
   "messageClean": string;
-  "timeClean": string;
+  "sound": string;
   "targetFPY": number;
+  "times": Array<any>;
   "id": any;
   "customerId": any;
   shifts: Shift[];
@@ -74,22 +78,30 @@ export class Line implements LineInterface {
           type: 'boolean',
           default: false
         },
-        "isCommonFPY": {
-          name: 'isCommonFPY',
+        "isAutofill": {
+          name: 'isAutofill',
           type: 'boolean',
-          default: true
+          default: false
+        },
+        "currentShift": {
+          name: 'currentShift',
+          type: 'string'
         },
         "messageClean": {
           name: 'messageClean',
           type: 'string'
         },
-        "timeClean": {
-          name: 'timeClean',
+        "sound": {
+          name: 'sound',
           type: 'string'
         },
         "targetFPY": {
           name: 'targetFPY',
           type: 'number'
+        },
+        "times": {
+          name: 'times',
+          type: 'Array&lt;any&gt;'
         },
         "id": {
           name: 'id',

@@ -8,6 +8,7 @@ import { Shift } from '../../models/Shift';
 import { Timeline } from '../../models/Timeline';
 import { Family } from '../../models/Family';
 import { TimeClean } from '../../models/TimeClean';
+import { Container } from '../../models/Container';
 
 export interface Models { [name: string]: any }
 
@@ -23,6 +24,7 @@ export class SDKModels {
     Timeline: Timeline,
     Family: Family,
     TimeClean: TimeClean,
+    Container: Container,
     
   };
 

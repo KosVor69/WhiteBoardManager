@@ -57,6 +57,7 @@ import { ShiftApi } from './services/custom/Shift';
 import { TimelineApi } from './services/custom/Timeline';
 import { FamilyApi } from './services/custom/Family';
 import { TimeCleanApi } from './services/custom/TimeClean';
+import { ContainerApi } from './services/custom/Container';
 /**
 * @module SDKBrowserModule
 * @description
@@ -96,6 +97,7 @@ export class SDKBrowserModule {
         TimelineApi,
         FamilyApi,
         TimeCleanApi,
+        ContainerApi,
         internalStorageProvider,
         { provide: SDKStorage, useClass: StorageBrowser },
         { provide: SocketDriver, useClass: SocketBrowser }

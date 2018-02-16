@@ -81,13 +81,8 @@ export abstract class BaseLoopBackApi {
       // Headers to be sent
       let headers: Headers = new Headers();
       headers.append('Content-Type', 'application/json');
-      // headers.append('withCredentials', 'true');
-      /*headers.append('Access-Control-Allow-Methods', 'DELETE, HEAD, GET, OPTIONS, POST, PUT');
-      headers.append('Access-Control-Allow-Headers', 'Content-Type, Content-Range, Content-Disposition, Content-Description');*/
       // Authenticate request
-     
-      
-      //this.authenticate(url, headers);
+      this.authenticate(url, headers);
       // Body fix for built in remote methods using "data", "options" or "credentials
       // that are the actual body, Custom remote method properties are different and need
       // to be wrapped into a body object

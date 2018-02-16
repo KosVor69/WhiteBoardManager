@@ -13,7 +13,7 @@
     "name": "localfile",
     "connector": "loopback-component-storage",
     "provider": "filesystem",
-    "root": "./files/sounds",
+    "root": "./",
     "maxFileSize": "10485760"
   }
 }
