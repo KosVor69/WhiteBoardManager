@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 import {ENTER, COMMA} from '@angular/cdk/keycodes';
@@ -12,7 +12,7 @@ import { TimeClean } from '../../sdk/index';
   })
   export class LineDialogComponent {
 
-    times = new Array<TimeClean>();
+    times = new Array<string>();
 
     visible = true;
     selectable = true;
@@ -21,25 +21,43 @@ import { TimeClean } from '../../sdk/index';
     // Enter, comma
     separatorKeysCodes = [ENTER, COMMA];
     fileToUpload: File = null;
-
+    fileCleanSound: File = null;
     constructor(
       public dialogRef: MatDialogRef<LineDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any) { }
+
+      // tslint:disable-next-line:use-life-cycle-interface
+      ngOnInit() {
+        if (this.data.line.times !== undefined) {
+        this.times = this.data.line.times;
+        }
+      }
+
 
       delete(): void {
         this.data.delete = true;
         this.dialogRef.close(this.data);
     }
 
-    save(line): void {
-
-      this.data.sound = this.fileToUpload;
-      this.data.times = this.times;
+    save(): void {
+      if (this.fileToUpload !== null) {
+        this.data.line.sound = this.fileToUpload.name;
+        this.data.sound = this.fileToUpload;
+      }
+      if (this.fileCleanSound !== null) {
+        this.data.line.cleanSound = this.fileCleanSound.name;
+        this.data.cleanSound = this.fileCleanSound;
+      }
+      this.data.line.times = this.times;
         this.dialogRef.close(this.data);
     }
 
     handleFileInput(files: FileList) {
       this.fileToUpload = files.item(0);
+  }
+
+  getCleanSound(files: FileList) {
+    this.fileCleanSound = files.item(0);
   }
 
     add(event: MatChipInputEvent): void {
@@ -48,7 +66,7 @@ import { TimeClean } from '../../sdk/index';
 
         // Add our fruit
         if ((value || '').trim()) {
-            const time = new TimeClean({time: value.trim() });
+            const time = value;
           this.times.push(time);
         }
 
@@ -64,12 +82,4 @@ import { TimeClean } from '../../sdk/index';
           this.times.splice(index, 1);
         }
       }
-
-    // tslint:disable-next-line:member-ordering
-    name = new FormControl('', [Validators.required, Validators.pattern('[a-zA-Z]+')]);
-    getErrorMessage() {
-        return this.name.hasError('required') ? 'You must enter a value' :
-            this.name.hasError('name') ? 'Not a valid name' :
-                '';
-    }
   }

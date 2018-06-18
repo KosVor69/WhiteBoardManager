@@ -42,37 +42,30 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule} from '@angula
         top:0;
         left:0;
     }`],
-    template: `<h1 mat-dialog-title>{{data.name}}</h1>
+    template: `<h1 mat-dialog-title>{{data.title}}</h1>
     <div mat-dialog-content>
     <mat-form-field>
-    <input matInput placeholder="Name" [formControl]="name" required>
-    <mat-error *ngIf="name.invalid">{{getErrorMessage()}}</mat-error>
+    <input matInput placeholder="Name" [(ngModel)]="data.shift.name">
     </mat-form-field>
     </div>
     <div mat-dialog-actions>
-      <button mat-button *ngIf="data.name != 'New customer'" (click)="delete()">Delete</button>
+      <button mat-button *ngIf="data.title != 'New shift'" (click)="delete()">Delete</button>
       <button mat-button cdkFocusInitial (click)="save()">Save</button>
     </div>`,
   })
   export class ShiftDialogComponent {
-  
+
     constructor(
       public dialogRef: MatDialogRef<ShiftDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any) { }
-  
+
     delete(): void {
-      this.dialogRef.close();
+        this.data.delete = true;
+      this.dialogRef.close(this.data);
     }
 
     save(): void {
-        this.dialogRef.close();
+        this.dialogRef.close(this.data);
       }
 
-    name = new FormControl('', [Validators.required, Validators.pattern('[a-zA-Z]+')]);
-    getErrorMessage() {
-        return this.name.hasError('required') ? 'You must enter a value' :
-            this.name.hasError('name') ? 'Not a valid name' :
-                '';
-    }
-  
   }

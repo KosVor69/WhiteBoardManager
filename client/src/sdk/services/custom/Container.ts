@@ -266,7 +266,7 @@ export class ContainerApi extends BaseLoopBackApi {
     };
     let _postBody: any = {};
     let _urlParams: any = {};
-    let result = this.request(_method, _url, _routeParams, _urlParams, _postBody, null, customHeaders);
+    let result = this.requestUpload(_method, _url, _routeParams, _urlParams, _postBody, null, customHeaders);
     return result;
   }
 

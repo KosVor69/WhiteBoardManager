@@ -1,3 +1,4 @@
+import { forEach } from '@angular/router/src/utils/collection';
 import { Customer } from './../../sdk/models/Customer';
 import { Shift } from './../../sdk/models/Shift';
 import { Line } from './../../sdk/models/Line';
@@ -10,7 +11,7 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { error } from 'util';
-import { LoopBackConfig, CustomerApi, ShiftApi, LineApi } from '../../sdk';
+import { LoopBackConfig, CustomerApi, ShiftApi, LineApi, ContainerApi } from '../../sdk';
 import { Injectable, Inject, Optional } from '@angular/core';
 
 @Component({
@@ -21,7 +22,7 @@ import { Injectable, Inject, Optional } from '@angular/core';
 
 
 export class BoardComponent {
-  line: string;
+  line: Line;
   lineId: string;
   timelineFromTime = new Date();
   timelineToTime = new Date();
@@ -58,64 +59,95 @@ export class BoardComponent {
   line4description: string;
   line4fpy: number;
 
-  totalPlan: number;
-  totalTarget: number;
-  totalProduced: number;
-  totalDevPlan: number;
-  totalDevTarget: number;
-  targetFPY: string;
+  totalPlan = 0;
+  totalTarget = 0;
+  totalProduced = 0;
+  totalDevPlan = 0;
+  totalDevTarget = 0;
+  targetFPY: number;
+
+  isMessageVisible = false;
+  messageClean: string;
+  backgroundColor: string;
+  color: string;
 
   constructor(private route: ActivatedRoute
     , public mainService: MainService
     , private lineApi: LineApi
     , private customerApi: CustomerApi
-    , private shiftApi: ShiftApi) {
+    , private shiftApi: ShiftApi
+    , private containerApi: ContainerApi) {
 
     this.querySubscription = this.route.queryParams.subscribe(
       (queryParam: any) => {
-        this.line = queryParam['line'];
+        lineApi.findById(queryParam['line']).subscribe((l: Line) => {
+          this.line = l;
+          this.targetFPY = l.targetFPY;
+          this.currentShiftId = l.currentShift;
+
+          const timer = Observable.timer(1000, 1000);
+          timer.subscribe(x => {
+            this.dateTime = new Date();
+          });
+
+          const timerFillBoard = Observable.timer(1000, 1000);
+          timerFillBoard.subscribe(x => {
+            this.fillBoard();
+
+            if (l.isEnableClean) {
+              l.times.forEach((value) => {
+                // tslint:disable-next-line:max-line-length
+                if (Date.parse(new Date().toDateString() + ' ' + value) > Date.now() - 500 && Date.parse(new Date().toDateString() + ' ' + value) < Date.now() + 500) {
+                  this.isMessageVisible = true;
+                  this.backgroundColor = 'red';
+                  this.color = 'white';
+                  this.messageClean = l.messageClean;
+
+                  const audio = new Audio();
+                  audio.src = 'http://10.152.5.93:3030/api/containers/' + l.id + '/download/' + l.cleanSound;
+                  audio.load();
+                  audio.play();
+
+                  setTimeout(function () {
+                    this.isMessageVisible = false;
+                  }.bind(this), 30000);
+                }
+              });
+            }
+          });
+        }
+        );
       }
     );
 
-    const timer = Observable.timer(1000, 1000);
-    timer.subscribe(x => {
-      this.dateTime = new Date();
-    });
 
-    const timerFillBoard = Observable.timer(1000, 1000);
-    timerFillBoard.subscribe(x => {
-      this.fillBoard();
-    });
-
-
-    lineApi.findOne({ where: { name: this.line } }, function (err, lines) { }).subscribe((line: Line) => {
-      this.targetFPY = String(line.targetFPY);
-      lineApi.getShifts(line.id, { where: { isEnable: true } }, function (err, shifts) { }).subscribe((shifts: Shift[]) => {
-        shifts.forEach(shift => {
-          shiftApi.getTimelines(shift.id, undefined, function (err, timelines) { }).subscribe((timelines: Timeline[]) => {
-            let i = 1;
-            // tslint:disable-next-line:max-line-length
-            timelines.sort((a: Timeline, b: Timeline) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
-              .forEach(timeline => {
-                if (i === 1) {
-                  this.timelineFromTime.setTime(Date.parse(new Date().toDateString() + ' ' + timeline.from));
-                } else {
-                  this.timelineToTime.setTime(Date.parse(new Date().toDateString() + ' ' + timeline.to));
-                }
-                i++;
-              });
-            // tslint:disable-next-line:max-line-length
-            if (this.dateTime.getTime() >= this.timelineFromTime.getTime() && this.dateTime.getTime() <= this.timelineToTime.getTime()) {
-              console.log('Current shift found ' + shift.name);
-              this.currentShiftId = shift.id;
-              this.fillBoard();
-            }
-
-          });
-        });
+    const refreshLine = Observable.timer(60000, 60000);
+    refreshLine.subscribe(x => {
+      lineApi.findById(this.line.id).subscribe((l: Line) => {
+        this.line = l;
       });
+    });
+
+  }
+
+
+  check(time) {
+    // tslint:disable-next-line:max-line-length
+    if (Date.parse(new Date().toDateString() + ' ' + time) > Date.now() - 500 && Date.parse(new Date().toDateString() + ' ' + time) < Date.now() + 500) {
+      this.isMessageVisible = true;
+      this.backgroundColor = 'black';
+      this.color = 'white';
+      this.messageClean = 'ПЕРЕРЫВ';
+
+      const audio = new Audio();
+      audio.src = 'http://10.152.5.93:3030/api/containers/' + this.line.id + '/download/' + this.line.sound;
+      audio.load();
+      audio.play();
+
+      setTimeout(function () {
+        this.isMessageVisible = false;
+      }.bind(this), 30000);
     }
-    );
   }
 
   fillBoard() {
@@ -131,6 +163,9 @@ export class BoardComponent {
         // tslint:disable-next-line:max-line-length
         timelines.sort((a: Timeline, b: Timeline) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
           .forEach(t => {
+
+            this.check(t.to);
+
             switch (index) {
               case 1: {
                 this.line1time = t.from + ' - ' + t.to;
@@ -138,41 +173,61 @@ export class BoardComponent {
                 this.line1plan = t.plan;
                 this.line1target = t.target;
                 this.line1produced = t.produced;
-                this.line1fpy = t.fpy;
+                if (t.fpy !== 0) { this.line1fpy = t.fpy;
+                } else { this.line1fpy = null; }
+                this.line1description = t.description;
                 index++;
 
                 tempTotalPlan += t.plan;
                 tempTotalTarget += t.target;
                 tempTotalProduced += t.produced;
+                if (t.produced !== 0) {
                 tempTotalDevTarget += t.produced - t.target;
                 tempTotalDevPlan += t.produced - t.plan;
-
-
-                if (t.produced / t.target * 100 > 90) {
-                  document.getElementById('productivity1').style.backgroundColor = 'green';
-                } else {
-                  document.getElementById('productivity1').style.backgroundColor = 'red';
-                }
-                if (t.produced > 0 && t.target > 0) {
-                if (t.produced / t.target * 100 > 99.99) {
-                  document.getElementById('productivity1').innerText = (t.produced / t.target * 100).toFixed(1);
-                } else {
-                  document.getElementById('productivity1').innerText = (t.produced / t.target * 100).toFixed(2);
-                }
-              }
-                document.getElementById('devoftarget1').innerText = String(t.produced - t.target);
-                if (t.produced - t.target > 0) {
-                  document.getElementById('devoftarget1').style.color = 'green';
-                } else {
-                  document.getElementById('devoftarget1').style.color = 'red';
                 }
 
-                document.getElementById('devofplan1').innerText = String(t.produced - t.plan);
-                if (t.produced - t.plan > 0) {
-                  document.getElementById('devofplan1').style.color = 'green';
+                if (t.produced === 0) {
+                  document.getElementById('productivity1').style.backgroundColor = 'white';
+                  document.getElementById('productivity1').innerText = (0).toFixed(1);
+                  document.getElementById('devoftarget1').innerText = '';
+                  document.getElementById('devofplan1').innerText = '';
                 } else {
-                  document.getElementById('devofplan1').style.color = 'red';
+                  if (t.produced / t.target * 100 > 90) {
+                    document.getElementById('productivity1').style.backgroundColor = 'green';
+                  } else {
+                    document.getElementById('productivity1').style.backgroundColor = 'red';
+                  }
+
+                  if (t.produced > 0 && t.target > 0) {
+                    if (t.produced / t.target * 100 > 99.99) {
+                      document.getElementById('productivity1').innerText = (t.produced / t.target * 100).toFixed(1);
+                    } else {
+                      document.getElementById('productivity1').innerText = (t.produced / t.target * 100).toFixed(2);
+                    }
+                  }
+
+                  document.getElementById('devoftarget1').innerText = String(t.produced - t.target);
+                  if (t.produced - t.target >= 0) {
+                    document.getElementById('devoftarget1').style.color = 'green';
+                  } else {
+                    document.getElementById('devoftarget1').style.color = 'red';
+                  }
+
+                  document.getElementById('devofplan1').innerText = String(t.produced - t.plan);
+                  if (t.produced - t.plan >= 0) {
+                    document.getElementById('devofplan1').style.color = 'green';
+                  } else {
+                    document.getElementById('devofplan1').style.color = 'red';
+                  }
+
+                  if (t.fpy >= this.targetFPY) {
+                    document.getElementById('fpy1').style.color = 'green';
+                  } else {
+                    document.getElementById('fpy1').style.color = 'red';
+                  }
+
                 }
+
                 break;
               }
               case 2: {
@@ -181,42 +236,60 @@ export class BoardComponent {
                 this.line2plan = t.plan;
                 this.line2target = t.target;
                 this.line2produced = t.produced;
-                this.line2fpy = t.fpy;
+                if (t.fpy !== 0) { this.line2fpy = t.fpy;
+                } else { this.line2fpy = null; }
+                this.line2description = t.description;
                 index++;
 
                 tempTotalPlan += t.plan;
                 tempTotalTarget += t.target;
                 tempTotalProduced += t.produced;
+                if (t.produced !== 0) {
                 tempTotalDevTarget += t.produced - t.target;
                 tempTotalDevPlan += t.produced - t.plan;
-
-                if (t.produced / t.target * 100 > 90) {
-                  document.getElementById('productivity2').style.backgroundColor = 'green';
-                } else {
-                  document.getElementById('productivity2').style.backgroundColor = 'red';
                 }
 
-                if (t.produced > 0 && t.target > 0) {
-                  if (t.produced / t.target * 100 > 99.99) {
-                    document.getElementById('productivity2').innerText = (t.produced / t.target * 100).toFixed(1);
+                if (t.produced === 0) {
+                  document.getElementById('productivity2').style.backgroundColor = 'white';
+                  document.getElementById('productivity2').innerText = (0).toFixed(1);
+                  document.getElementById('devoftarget2').innerText = '';
+                  document.getElementById('devofplan2').innerText = '';
+                } else {
+                  if (t.produced / t.target * 100 > 90) {
+                    document.getElementById('productivity2').style.backgroundColor = 'green';
                   } else {
-                    document.getElementById('productivity2').innerText = (t.produced / t.target * 100).toFixed(2);
+                    document.getElementById('productivity2').style.backgroundColor = 'red';
+                  }
+
+                  if (t.produced > 0 && t.target > 0) {
+                    if (t.produced / t.target * 100 > 99.99) {
+                      document.getElementById('productivity2').innerText = (t.produced / t.target * 100).toFixed(1);
+                    } else {
+                      document.getElementById('productivity2').innerText = (t.produced / t.target * 100).toFixed(2);
+                    }
+                  }
+
+                  document.getElementById('devoftarget2').innerText = String(t.produced - t.target);
+                  if (t.produced - t.target >= 0) {
+                    document.getElementById('devoftarget2').style.color = 'green';
+                  } else {
+                    document.getElementById('devoftarget2').style.color = 'red';
+                  }
+
+                  document.getElementById('devofplan2').innerText = String(t.produced - t.plan);
+                  if (t.produced - t.plan >= 0) {
+                    document.getElementById('devofplan2').style.color = 'green';
+                  } else {
+                    document.getElementById('devofplan2').style.color = 'red';
+                  }
+
+                  if (t.fpy >= this.targetFPY) {
+                    document.getElementById('fpy2').style.color = 'green';
+                  } else {
+                    document.getElementById('fpy2').style.color = 'red';
                   }
                 }
 
-                document.getElementById('devoftarget2').innerText = String(t.produced - t.target);
-                if (t.produced - t.target > 0) {
-                  document.getElementById('devoftarget2').style.color = 'green';
-                } else {
-                  document.getElementById('devoftarget2').style.color = 'red';
-                }
-
-                document.getElementById('devofplan2').innerText = String(t.produced - t.plan);
-                if (t.produced - t.plan > 0) {
-                  document.getElementById('devofplan2').style.color = 'green';
-                } else {
-                  document.getElementById('devofplan2').style.color = 'red';
-                }
                 break;
               }
               case 3: {
@@ -225,40 +298,59 @@ export class BoardComponent {
                 this.line3plan = t.plan;
                 this.line3target = t.target;
                 this.line3produced = t.produced;
-                this.line3fpy = t.fpy;
+                if (t.fpy !== 0) { this.line3fpy = t.fpy;
+                } else { this.line3fpy = null; }
+                this.line3description = t.description;
                 index++;
 
                 tempTotalPlan += t.plan;
                 tempTotalTarget += t.target;
                 tempTotalProduced += t.produced;
+                if (t.produced !== 0) {
                 tempTotalDevTarget += t.produced - t.target;
                 tempTotalDevPlan += t.produced - t.plan;
-
-                if (t.produced / t.target * 100 > 90) {
-                  document.getElementById('productivity3').style.backgroundColor = 'green';
-                } else {
-                  document.getElementById('productivity3').style.backgroundColor = 'red';
-                }
-                if (t.produced > 0 && t.target > 0) {
-                if (t.produced / t.target * 100 > 99.99) {
-                  document.getElementById('productivity3').innerText = (t.produced / t.target * 100).toFixed(1);
-                } else {
-                  document.getElementById('productivity3').innerText = (t.produced / t.target * 100).toFixed(2);
-                }
-              }
-                document.getElementById('devoftarget3').innerText = String(t.produced - t.target);
-                if (t.produced - t.target > 0) {
-                  document.getElementById('devoftarget3').style.color = 'green';
-                } else {
-                  document.getElementById('devoftarget3').style.color = 'red';
                 }
 
-                document.getElementById('devofplan3').innerText = String(t.produced - t.plan);
-                if (t.produced - t.plan > 0) {
-                  document.getElementById('devofplan3').style.color = 'green';
+                if (t.produced === 0) {
+                  document.getElementById('productivity3').style.backgroundColor = 'white';
+                  document.getElementById('productivity3').innerText = (0).toFixed(1);
+                  document.getElementById('devoftarget3').innerText = '';
+                  document.getElementById('devofplan3').innerText = '';
                 } else {
-                  document.getElementById('devofplan3').style.color = 'red';
+                  if (t.produced / t.target * 100 > 90) {
+                    document.getElementById('productivity3').style.backgroundColor = 'green';
+                  } else {
+                    document.getElementById('productivity3').style.backgroundColor = 'red';
+                  }
+                  if (t.produced > 0 && t.target > 0) {
+                    if (t.produced / t.target * 100 > 99.99) {
+                      document.getElementById('productivity3').innerText = (t.produced / t.target * 100).toFixed(1);
+                    } else {
+                      document.getElementById('productivity3').innerText = (t.produced / t.target * 100).toFixed(2);
+                    }
+                  }
+
+                  document.getElementById('devoftarget3').innerText = String(t.produced - t.target);
+                  if (t.produced - t.target >= 0) {
+                    document.getElementById('devoftarget3').style.color = 'green';
+                  } else {
+                    document.getElementById('devoftarget3').style.color = 'red';
+                  }
+
+                  document.getElementById('devofplan3').innerText = String(t.produced - t.plan);
+                  if (t.produced - t.plan >= 0) {
+                    document.getElementById('devofplan3').style.color = 'green';
+                  } else {
+                    document.getElementById('devofplan3').style.color = 'red';
+                  }
+
+                  if (t.fpy >= this.targetFPY) {
+                    document.getElementById('fpy3').style.color = 'green';
+                  } else {
+                    document.getElementById('fpy3').style.color = 'red';
+                  }
                 }
+
                 break;
               }
               case 4: {
@@ -267,40 +359,59 @@ export class BoardComponent {
                 this.line4plan = t.plan;
                 this.line4target = t.target;
                 this.line4produced = t.produced;
-                this.line4fpy = t.fpy;
+                if (t.fpy !== 0) { this.line4fpy = t.fpy;
+                } else { this.line4fpy = null; }
+                this.line4description = t.description;
                 index++;
 
                 tempTotalPlan += t.plan;
                 tempTotalTarget += t.target;
                 tempTotalProduced += t.produced;
+                if (t.produced !== 0) {
                 tempTotalDevTarget += t.produced - t.target;
                 tempTotalDevPlan += t.produced - t.plan;
-
-                if (t.produced / t.target * 100 > 90) {
-                  document.getElementById('productivity4').style.backgroundColor = 'green';
-                } else {
-                  document.getElementById('productivity4').style.backgroundColor = 'red';
-                }
-                if (t.produced > 0 && t.target > 0) {
-                if (t.produced / t.target * 100 > 99.99) {
-                  document.getElementById('productivity4').innerText = (t.produced / t.target * 100).toFixed(1);
-                } else {
-                  document.getElementById('productivity4').innerText = (t.produced / t.target * 100).toFixed(2);
-                }
-              }
-                document.getElementById('devoftarget4').innerText = String(t.produced - t.target);
-                if (t.produced - t.target > 0) {
-                  document.getElementById('devoftarget4').style.color = 'green';
-                } else {
-                  document.getElementById('devoftarget4').style.color = 'red';
                 }
 
-                document.getElementById('devofplan4').innerText = String(t.produced - t.plan);
-                if (t.produced - t.plan > 0) {
-                  document.getElementById('devofplan4').style.color = 'green';
+                if (t.produced === 0) {
+                  document.getElementById('productivity4').style.backgroundColor = 'white';
+                  document.getElementById('productivity4').innerText = (0).toFixed(1);
+                  document.getElementById('devoftarget4').innerText = '';
+                  document.getElementById('devofplan4').innerText = '';
                 } else {
-                  document.getElementById('devofplan4').style.color = 'red';
+                  if (t.produced / t.target * 100 > 90) {
+                    document.getElementById('productivity4').style.backgroundColor = 'green';
+                  } else {
+                    document.getElementById('productivity4').style.backgroundColor = 'red';
+                  }
+                  if (t.produced > 0 && t.target > 0) {
+                    if (t.produced / t.target * 100 > 99.99) {
+                      document.getElementById('productivity4').innerText = (t.produced / t.target * 100).toFixed(1);
+                    } else {
+                      document.getElementById('productivity4').innerText = (t.produced / t.target * 100).toFixed(2);
+                    }
+                  }
+
+                  document.getElementById('devoftarget4').innerText = String(t.produced - t.target);
+                  if (t.produced - t.target >= 0) {
+                    document.getElementById('devoftarget4').style.color = 'green';
+                  } else {
+                    document.getElementById('devoftarget4').style.color = 'red';
+                  }
+
+                  document.getElementById('devofplan4').innerText = String(t.produced - t.plan);
+                  if (t.produced - t.plan >= 0) {
+                    document.getElementById('devofplan4').style.color = 'green';
+                  } else {
+                    document.getElementById('devofplan4').style.color = 'red';
+                  }
+
+                  if (t.fpy >= this.targetFPY) {
+                    document.getElementById('fpy4').style.color = 'green';
+                  } else {
+                    document.getElementById('fpy4').style.color = 'red';
+                  }
                 }
+
                 break;
               }
 
@@ -312,8 +423,17 @@ export class BoardComponent {
         this.totalPlan = tempTotalPlan;
         this.totalProduced = tempTotalProduced;
         this.totalDevTarget = tempTotalDevTarget;
+        if (tempTotalDevTarget >= 0) {
+          document.getElementById('devoftargetotal').style.color = 'green';
+        } else {
+          document.getElementById('devoftargetotal').style.color = 'red';
+        }
         this.totalDevPlan = tempTotalDevPlan;
-
+        if (tempTotalDevPlan >= 0) {
+          document.getElementById('devofplantotal').style.color = 'green';
+        } else {
+          document.getElementById('devofplantotal').style.color = 'red';
+        }
       });
     }
   }

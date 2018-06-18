@@ -5,34 +5,35 @@
     <div id="grid-main">
         <div id="grid-main-column1">
             <mat-form-field>
-                <input matInput placeholder="Name" [(ngModel)]="data.name">
+                <input matInput placeholder="Name" [(ngModel)]="data.line.name">
             </mat-form-field>
 
             <mat-form-field>
-                <input matInput placeholder="Message for clean" [(ngModel)]="data.messageClean">
+                <input matInput placeholder="Message for clean" [(ngModel)]="data.line.messageClean">
             </mat-form-field>
 
             <div id='grid-main-sub-row'>
-                <mat-slide-toggle [(ngModel)]="data.isAutofill">Autofill</mat-slide-toggle>
-                <mat-slide-toggle [(ngModel)]="data.isEnableClean">Clean</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="data.line.isAutofill">Autofill</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="data.line.isEnableClean">Clean</mat-slide-toggle>
                 <mat-form-field>
-                    <input matInput placeholder="Target FPY" [(ngModel)]="data.targetFPY">
+                    <input matInput placeholder="Target FPY" maxlength="5" [(ngModel)]="data.line.targetFPY">
                 </mat-form-field>
             </div>
 
-<div style="line-height:60px">
-            <input type="file" id="file" (change)="handleFileInput($event.target.files)" accept="audio/wav">
+<div id='grid-inputs-file'>
+            <p>Sound:</p><p>{{data.line.sound}}</p><input type="file" id="file" (change)="handleFileInput($event.target.files)" accept="audio/wav" style="margin: 10px;">
+            <p>Clean sound:</p><p>{{data.line.cleanSound}}</p><input type="file" id="file" (change)="getCleanSound($event.target.files)" accept="audio/wav" style="margin: 10px;">
         </div>
 
             <mat-form-field>
                 TimeClean:
                 <mat-chip-list #chipList>
-                    <mat-chip *ngFor="let time of times" [selectable]="selectable" [removable]="removable" (remove)="remove(time)">{{time.time}}
+                    <mat-chip *ngFor="let time of times" [selectable]="selectable" [removable]="removable" (remove)="remove(time)">{{time}}
                         <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
                     </mat-chip>
                 </mat-chip-list>
                 <input [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="addOnBlur"
-                    (matChipInputTokenEnd)="add($event)" maxlength="5" />
+                    (matChipInputTokenEnd)="add($event)" mask="00:00"  maxlength="5" />
             </mat-form-field>
 
         </div>

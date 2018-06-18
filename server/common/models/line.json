@@ -30,15 +30,14 @@
     "sound": {
       "type": "string"
     },
+    "cleanSound": {
+      "type": "string"
+    },
     "targetFPY": {
       "type": "number"
     },
     "times": {
-      "type": [
-       {
-          "time": "string"
-       }
-    ]
+      "type": ["string"]
     }
   },
   "validations": [],

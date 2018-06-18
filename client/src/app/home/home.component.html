@@ -2,7 +2,6 @@
     <mat-toolbar>
         <span>White Board Manager</span>
         <span class="example-spacer"></span>
-        <i class="material-icons example-icon" (click)="goToSettings()">settings</i>
       </mat-toolbar>
   <main class="content">
     <div id="grid-controls">
@@ -42,12 +41,12 @@
       <div class="grid-item">
           <mat-form-field>
               <mat-select placeholder="Shift" [(ngModel)]="shiftSelector">
-                <mat-option value="option" *ngFor="let shift of Shifts" (click)="onShiftSelect(shift.id)">{{shift.name}}</mat-option>
+                <mat-option value="option" *ngFor="let shift of Shifts" (click)="onShiftSelect(shift)">{{shift.name}}</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-icon (click)="newShift()">add</mat-icon>
-            <mat-icon *ngIf="shiftSelected" (click)="editShift()">edit</mat-icon>
-       
+            <mat-icon *ngIf="lineSelected" (click)="newShift()">add</mat-icon>
+            <mat-icon *ngIf="shiftSelected" (click)="editShift(currentShift)">edit</mat-icon>
+            <mat-checkbox *ngIf="shiftSelected" [(ngModel)]="isCurrentShift" (change)="onCurrentShiftChange($event)">Current shift</mat-checkbox>
         <!--<p>Shift:</p>
         <select id="shift-select" [(ngModel)]="shiftSelector" class="soflow" (change)="onShiftSelect($event.target.value)">
           <option value="" selected disabled hidden></option>
@@ -68,10 +67,10 @@
         <p>Model</p>
       </div>
       <div class="grid-item">
-        <p>Plan</p>
+        <p>Target</p>
       </div>
       <div class="grid-item">
-        <p>Target</p>
+        <p>Plan</p>
       </div>
       <div class="grid-item">
         <p>Produced</p>
@@ -85,25 +84,25 @@
 
       <!-- 1 timeline -->
       <div class="grid-item">
-        <input [(ngModel)]="from1" type="text" (input)="onFrom1input($event.target.value)">
+        <input [(ngModel)]="from1" maxlength="5" type="text" (input)="onFrom1input($event.target.value)">
       </div>
       <div class="grid-item">
-        <input type="text" [(ngModel)]="to1" (input)="onTo1input($event.target.value)">
+        <input type="text" [(ngModel)]="to1" maxlength="5" (input)="onTo1input($event.target.value)">
       </div>
       <div class="grid-item">
         <input [(ngModel)]="model1" type="text" (input)="onModel1input($event.target.value)">
       </div>
       <div class="grid-item">
-        <input [(ngModel)]="plan1" type="text" (input)="onPlan1input($event.target.value)">
+        <input [(ngModel)]="target1" type="number" (input)="onTarget1input($event.target.value)">
       </div>
       <div class="grid-item">
-        <input [(ngModel)]="target1" type="text" (input)="onTarget1input($event.target.value)">
+        <input [(ngModel)]="plan1"  type="number" (input)="onPlan1input($event.target.value)">
       </div>
       <div class="grid-item">
-        <input [(ngModel)]="produced1" type="text" (input)="onProduced1input($event.target.value)">
+        <input [(ngModel)]="produced1" type="number" (input)="onProduced1input($event.target.value)">
       </div>
       <div class="grid-item">
-        <input [(ngModel)]="fpy1" type="text" (input)="onFPY1input($event.target.value)">
+        <input [(ngModel)]="fpy1" type="number" (input)="onFPY1input($event.target.value)">
       </div>
       <div class="grid-item">
         <textarea [(ngModel)]="description1" style="font-size:12px; height:37px; width:300px; resize: none;" (input)="onDescription1input($event.target.value)"></textarea>
@@ -111,25 +110,25 @@
 
       <!-- 2 timeline -->
       <div class="grid-item">
-          <input [(ngModel)]="from2" type="text" (input)="onFrom2input($event.target.value)">
+          <input [(ngModel)]="from2" type="text" maxlength="5" (input)="onFrom2input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input type="text" [(ngModel)]="to2" (input)="onTo2input($event.target.value)">
+          <input type="text" [(ngModel)]="to2" maxlength="5" (input)="onTo2input($event.target.value)">
         </div>
         <div class="grid-item">
           <input [(ngModel)]="model2" type="text" (input)="onModel2input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="plan2" type="text" (input)="onPlan2input($event.target.value)">
+          <input [(ngModel)]="target2" type="number" (input)="onTarget2input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="target2" type="text" (input)="onTarget2input($event.target.value)">
+          <input [(ngModel)]="plan2" type="number" (input)="onPlan2input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="produced2" type="text" (input)="onProduced2input($event.target.value)">
+          <input [(ngModel)]="produced2" type="number" (input)="onProduced2input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="fpy2" type="text" (input)="onFPY2input($event.target.value)">
+          <input [(ngModel)]="fpy2" type="number" (input)="onFPY2input($event.target.value)">
         </div>
       <div class="grid-item">
           <textarea [(ngModel)]="description2" style="font-size:12px; height:37px; width:300px; resize: none;" (input)="onDescription2input($event.target.value)"></textarea>
@@ -137,25 +136,25 @@
 
       <!-- 3 timeline -->
       <div class="grid-item">
-          <input [(ngModel)]="from3" type="text" (input)="onFrom3input($event.target.value)">
+          <input [(ngModel)]="from3" type="text" maxlength="5" (input)="onFrom3input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input type="text" [(ngModel)]="to3" (input)="onTo3input($event.target.value)">
+          <input type="text" [(ngModel)]="to3" maxlength="5" (input)="onTo3input($event.target.value)">
         </div>
         <div class="grid-item">
           <input [(ngModel)]="model3" type="text" (input)="onModel3input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="plan3" type="text" (input)="onPlan3input($event.target.value)">
+          <input [(ngModel)]="target3" type="number" (input)="onTarget3input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="target3" type="text" (input)="onTarget3input($event.target.value)">
+          <input [(ngModel)]="plan3" type="number" (input)="onPlan3input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="produced3" type="text" (input)="onProduced3input($event.target.value)">
+          <input [(ngModel)]="produced3" type="number" (input)="onProduced3input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="fpy3" type="text" (input)="onFPY3input($event.target.value)">
+          <input [(ngModel)]="fpy3" type="number" (input)="onFPY3input($event.target.value)">
         </div>
   
       <div class="grid-item">
@@ -164,25 +163,25 @@
 
       <!-- 4 timeline -->
       <div class="grid-item">
-          <input [(ngModel)]="from4" type="text" (input)="onFrom4input($event.target.value)">
+          <input [(ngModel)]="from4" type="text" maxlength="5" (input)="onFrom4input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input type="text" [(ngModel)]="to4" (input)="onTo4input($event.target.value)">
+          <input type="text" [(ngModel)]="to4" maxlength="5" (input)="onTo4input($event.target.value)">
         </div>
         <div class="grid-item">
           <input [(ngModel)]="model4" type="text" (input)="onModel4input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="plan4" type="text" (input)="onPlan4input($event.target.value)">
+          <input [(ngModel)]="target4" type="number" (input)="onTarget4input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="target4" type="text" (input)="onTarget4input($event.target.value)">
+          <input [(ngModel)]="plan4" type="number" (input)="onPlan4input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="produced4" type="text" (input)="onProduced4input($event.target.value)">
+          <input [(ngModel)]="produced4" type="number" (input)="onProduced4input($event.target.value)">
         </div>
         <div class="grid-item">
-          <input [(ngModel)]="fpy4" type="text" (input)="onFPY4input($event.target.value)">
+          <input [(ngModel)]="fpy4" type="number" (input)="onFPY4input($event.target.value)">
         </div>
       <div class="grid-item">
           <textarea [(ngModel)]="description4" style="font-size:12px; height:37px; width:300px; resize: none;" (input)="onDescription4input($event.target.value)"></textarea>

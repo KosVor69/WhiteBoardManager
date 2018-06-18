@@ -1,3 +1,4 @@
+import { TimeClean } from './../../sdk/models/TimeClean';
 import { Container } from './../../sdk/models/Container';
 import { ContainerApi } from './../../sdk/services/custom/Container';
 import { Subject } from 'rxjs/Subject';
@@ -79,10 +80,13 @@ export class HomeComponent {
 
   currentLine: Line;
   currentCustomer: Customer;
+  currentShift: Shift;
 
   customerSelected = false;
   lineSelected = false;
   shiftSelected = false;
+
+  isCurrentShift = false;
 
   private user: User = new User();
 
@@ -114,7 +118,7 @@ export class HomeComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
-        let customer = new Customer();
+        const customer = new Customer();
         customer.name = result.name;
         console.log(customer.name);
         this.customerApi.create(customer).subscribe((c: Customer) => console.log('New customer created: ' + c.name));
@@ -127,7 +131,6 @@ export class HomeComponent {
 
   editCustomer(customer): void {
     const dialogRef = this.dialog.open(CustomerDialogComponent, {
-      width: '300px',
       data: { title: 'Edit customer', delete: false, name: customer.name, id: customer.id }
     });
 
@@ -153,32 +156,26 @@ export class HomeComponent {
 
   newLine(): void {
     const dialogRef = this.dialog.open(LineDialogComponent, {
-      data: { title: 'New line' }
+      data: { title: 'New line', line: new Line() }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
         let line = new Line();
-        line.name = result.name;
-        line.messageClean = result.messageClean;
-        line.targetFPY = result.targetFPY;
-        line.isEnableClean = result.isEnableClean;
-
+        line = result.line;
         line.customerId = this.currentCustomer.id;
         console.log(line.name);
         this.lineApi.create(line).subscribe((l: Line) => {
-          let c = new Container();
+          const c = new Container();
           c.name = l.id;
 
-          let fd = new FormData();
-          fd.append('file', result.sound, result.sound.name);
-
-         this.containerApi.createContainer(c).subscribe((r) => {
-            this.containerApi.upload(l.id, fd, undefined, function (): Headers {
-              let headerInfo = new Headers({ 'Accept': 'multipart/form-data' });
-              return headerInfo;
-             })
-            .subscribe((s: string) => console.log(s));
+          this.containerApi.createContainer(c).subscribe((r) => {
+            if (result.sound !== undefined) {
+            this.mainService.uploadFile(result.sound, l.id);
+            }
+            if (result.cleanSound !== undefined) {
+            this.mainService.uploadFile(result.cleanSound, l.id);
+            }
           });
 
           console.log('New line created: ' + l.name);
@@ -192,26 +189,25 @@ export class HomeComponent {
 
   editLine(line): void {
     const dialogRef = this.dialog.open(LineDialogComponent, {
-      data: { title: 'Edit customer', delete: false, name: line.name, id: line.id, customerId: line.customerId }
+      data: { title: 'Edit line', delete: false, line: line }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       // tslint:disable-next-line:prefer-const
       let lineEdited = new Line();
-      lineEdited.name = result.name;
-      lineEdited.customerId = result.customerId;
-      lineEdited.isAutofill = result.isAutofill;
-      lineEdited.isEnableClean = result.isEnableClean;
-      lineEdited.messageClean = result.messageClean;
-      lineEdited.targetFPY = result.targetFPY;
-      lineEdited.times = result.times;
+      lineEdited = result.line;
+
       if (result !== undefined) {
         if (result.delete === true) {
-          this.lineApi.deleteById(result.id).subscribe((deletedLine: Line) => {
+          this.lineApi.deleteById(line.id).subscribe((deletedLine: Line) => {
             console.log('Line deleted: ' + lineEdited.name);
           });
         } else {
-          this.lineApi.updateAttributes(result.id, lineEdited).subscribe((editedLine: Line) => {
+          this.lineApi.updateAttributes(line.id, lineEdited).subscribe((editedLine: Line) => {
+            if (result.sound !== undefined) {
+              this.mainService.uploadFile(result.sound, lineEdited.id);
+            }
+
             console.log('Line updated: ' + editedLine.name);
             this.currentLine = lineEdited;
           });
@@ -223,28 +219,65 @@ export class HomeComponent {
 
   newShift(): void {
     const dialogRef = this.dialog.open(ShiftDialogComponent, {
-      width: '300px',
-      data: { name: 'New customer' }
+      data: { title: 'New shift', shift: new Shift() }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+      if (result !== undefined) {
+        const shift = new Shift();
+        shift.lineId = this.currentLine.id;
+        shift.name = result.shift.name;
+        this.shiftApi.create(shift).subscribe((c: Shift) => {
+          console.log('New shift created: ' + c.name);
+          for (let i = 0; i < 4; i++) {
+            const timeLine = new Timeline();
+            timeLine.shiftId = c.id;
+            timeLine.from = '00:00';
+            timeLine.to = '00:00';
+            timeLine.plan = 0;
+            timeLine.target = 0;
+            timeLine.description = '';
+            this.timelineApi.create(timeLine).subscribe((t: Timeline) => {
+              console.log('New timeline created: ' + t.id);
+          });
+          }
+      });
+        this.shiftSelector = '';
+        this.currentShift = undefined;
+        this.updateShifts(this.currentLine.id);
+      }
     });
   }
 
-  editShift(): void {
+  editShift(shift): void {
     const dialogRef = this.dialog.open(ShiftDialogComponent, {
-      width: '300px',
-      data: { name: 'Edit customer' }
+      data: { title: 'Edit shift', delete: false, shift: shift }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+      let shiftEdited = new Shift();
+      shiftEdited = result.shift;
+
+      if (result !== undefined) {
+        if (result.delete === true) {
+          this.shiftApi.deleteTimelines(shift.id).subscribe((res: string) => console.log(res));
+          this.shiftApi.deleteById(shift.id).subscribe((deletedShift: Shift) => {
+            console.log('Shift deleted: ' + shiftEdited.name);
+          });
+        } else {
+          this.shiftApi.updateAttributes(shift.id, shiftEdited).subscribe((editedShift: Shift) => {
+
+            console.log('Shift updated: ' + editedShift.name);
+            this.currentShift = shiftEdited;
+          });
+        }
+      }
+      this.updateShifts(this.currentLine.id);
     });
   }
 
   goToWhiteBoard() {
-    this.router.navigate(['/board'], { queryParams: { line: this.currentLine.name } });
+    this.router.navigate(['/board'], { queryParams: { line: this.currentLine.id } });
   }
 
   goToSettings() {
@@ -285,6 +318,12 @@ export class HomeComponent {
     });
   }
 
+  updateShifts(lineId): void {
+    this.lineApi.getShifts(lineId, undefined, function (err, shift) { }).subscribe((shifts: Shift[]) => {
+      this.Shifts = shifts;
+    });
+  }
+
   onLineSelect(line): void {
     this.lineSelected = true;
     this.clearEditor();
@@ -301,10 +340,27 @@ export class HomeComponent {
     });
   }
 
-  onShiftSelect(shiftId): void {
+
+  onCurrentShiftChange(event) {
+    if (this.isCurrentShift) {
+      this.currentLine.currentShift = this.currentShift.id;
+      this.lineApi.updateAttributes(this.currentLine.id, this.currentLine).subscribe((editedLine: Line) => {
+        console.log('Line updated: ' + editedLine.name);
+      });
+    }
+  }
+
+  onShiftSelect(shift): void {
     this.shiftSelected = true;
+    this.currentShift = shift;
+
+    if (shift.id === this.currentLine.currentShift) {
+      this.isCurrentShift = true;
+    } else {
+      this.isCurrentShift = false;
+    }
     this.clearEditor();
-    this.shiftApi.getTimelines(shiftId, undefined, function (err, timeline) { }).subscribe((timelines: Timeline[]) => {
+    this.shiftApi.getTimelines(shift.id, undefined, function (err, timeline) { }).subscribe((timelines: Timeline[]) => {
       let i = 1;
       // tslint:disable-next-line:max-line-length
       timelines.sort((a: Timeline, b: Timeline) => Date.parse(new Date().toDateString() + ' ' + a.from) - Date.parse(new Date().toDateString() + ' ' + b.from))
@@ -317,7 +373,7 @@ export class HomeComponent {
               this.model1 = t.model === null ? '' : t.model;
               this.plan1 = t.plan === null ? '0' : String(t.plan);
               this.target1 = t.target === null ? '0' : String(t.target);
-              this.produced1 = t.produced === null ? '0' : String(t.produced);
+              this.produced1 = String(t.produced);
               this.fpy1 = t.fpy === null ? '' : String(t.fpy);
               this.description1 = t.description.length === 0 ? '' : String(t.description);
               i++;
@@ -330,7 +386,7 @@ export class HomeComponent {
               this.model2 = t.model === null ? '' : t.model;
               this.plan2 = t.plan === null ? '0' : String(t.plan);
               this.target2 = t.target === null ? '0' : String(t.target);
-              this.produced2 = t.produced === null ? '0' : String(t.produced);
+              this.produced2 = String(t.produced);
               this.fpy2 = t.fpy === null ? '' : String(t.fpy);
               this.description2 = t.description.length === 0 ? '' : String(t.description);
               i++;
@@ -343,7 +399,7 @@ export class HomeComponent {
               this.model3 = t.model === null ? '' : t.model;
               this.plan3 = t.plan === null ? '0' : String(t.plan);
               this.target3 = t.target === null ? '0' : String(t.target);
-              this.produced3 = t.produced === null ? '0' : String(t.produced);
+              this.produced3 = String(t.produced);
               this.fpy3 = t.fpy === null ? '' : String(t.fpy);
               this.description3 = t.description.length === 0 ? '' : String(t.description);
               i++;
@@ -356,7 +412,7 @@ export class HomeComponent {
               this.model4 = t.model === null ? '' : t.model;
               this.plan4 = t.plan === null ? '0' : String(t.plan);
               this.target4 = t.target === null ? '0' : String(t.target);
-              this.produced4 = t.produced === null ? '0' : String(t.produced);
+              this.produced4 = String(t.produced);
               this.fpy4 = t.fpy === null ? '' : String(t.fpy);
               this.description4 = t.description.length === 0 ? '' : String(t.description);
               i++;

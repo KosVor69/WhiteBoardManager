@@ -132,6 +132,62 @@ export abstract class BaseLoopBackApi {
         .catch((e) => this.errorHandler.handleError(e));
     }
   }
+
+  public requestUpload(
+    method         : string,
+    url            : string,
+    routeParams    : any = {},
+    urlParams      : any = {},
+    postBody       : any = {},
+    pubsub         : boolean = false,
+    customHeaders? : Function
+  ): Observable<any> {
+    // Transpile route variables to the actual request Values
+    Object.keys(routeParams).forEach((key: string) => {
+      url = url.replace(new RegExp(":" + key + "(\/|$)", "g"), routeParams[key] + "$1")
+    });
+    if (pubsub) {
+      if (url.match(/fk/)) {
+        let arr = url.split('/'); arr.pop();
+        url = arr.join('/');
+      }
+      let event: string = (`[${method}]${url}`).replace(/\?/, '');
+      let subject: Subject<any> = new Subject<any>();
+      this.connection.on(event, (res: any) => subject.next(res));
+      return subject.asObservable();
+    } else {
+      // Headers to be sent
+      let headers: Headers = new Headers();
+      // Authenticate request
+      // Body fix for built in remote methods using "data", "options" or "credentials
+      // that are the actual body, Custom remote method properties are different and need
+      // to be wrapped into a body object
+      let body: any;
+      let postBodyKeys = typeof postBody === 'object' ? Object.keys(postBody) : []
+      if (postBodyKeys.length === 1) {
+        body = postBody[postBodyKeys.shift()];
+      } else {
+        body = postBody;
+      }
+      let filter: string = '';
+
+      this.searchParams.setJSON(urlParams);
+      let request: Request = new Request(
+        new RequestOptions({
+          headers        : headers,
+          method         : method,
+          url            : `${url}${filter}`,
+          search         : Object.keys(urlParams).length > 0 ? this.searchParams.getURLSearchParams() : null,
+          body           : body,
+          withCredentials: LoopBackConfig.getRequestOptionsCredentials()
+        })
+      );
+      return this.http.request(request)
+        .map((res: any) => (res.text() != "" ? res.json() : {}))
+        .catch((e) => this.errorHandler.handleError(e));
+    }
+  }
+
   /**
    * @method authenticate
    * @author Jonathan Casarrubias <t: johncasarrubias, gh: mean-expert-official>

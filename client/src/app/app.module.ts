@@ -19,7 +19,7 @@ import { AppComponent } from './app.component';
 import { BoardComponent } from './board/board.component';
 import { HomeComponent } from './home/home.component' ;
 import { MainService } from './service/main.service';
-
+import {NgxMaskModule} from 'ngx-mask';
 import { LineApi } from './../sdk/services/custom/Line';
 import { SDKModels, StorageBrowser } from '../sdk/index';
 import { SettingsComponent } from './settings/settings.component';
@@ -82,6 +82,7 @@ const appRoutes: Routes = [
     , CdkTableModule
     , MatDialogModule
     , MatChipsModule
+    ,  NgxMaskModule.forRoot()
   ],
   providers: [
     MainService

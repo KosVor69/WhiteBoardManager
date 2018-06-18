@@ -13,6 +13,7 @@ export interface LineInterface {
   "currentShift"?: string;
   "messageClean"?: string;
   "sound"?: string;
+  "cleanSound"?: string;
   "targetFPY"?: number;
   "times"?: Array<any>;
   "id"?: any;
@@ -29,6 +30,7 @@ export class Line implements LineInterface {
   "currentShift": string;
   "messageClean": string;
   "sound": string;
+  "cleanSound": string;
   "targetFPY": number;
   "times": Array<any>;
   "id": any;
@@ -92,6 +94,10 @@ export class Line implements LineInterface {
           type: 'string'
         },
         "sound": {
+          name: 'sound',
+          type: 'string'
+        },
+        "cleanSound": {
           name: 'sound',
           type: 'string'
         },
